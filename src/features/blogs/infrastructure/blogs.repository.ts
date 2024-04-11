@@ -31,4 +31,26 @@ export class BlogsRepository {
       return false
     }
   }
+
+  async getBlogById(id: string): Promise<BlogDocument | null> {
+    try {
+      return await this.blogModel.findOne({ _id: new ObjectId(id) })
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  }
+
+  async updateBlog(id: string, blog: BlogDBModel): Promise<boolean> {
+    try {
+      const res = await this.blogModel.updateOne(
+        { _id: new ObjectId(id) },
+        blog,
+      )
+      return res.matchedCount === 1
+    } catch (e) {
+      console.error(e)
+      return false
+    }
+  }
 }

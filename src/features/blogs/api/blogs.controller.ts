@@ -3,15 +3,16 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
-  HttpException,
   InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository'
 import { BlogViewModel } from './models/blog.output.models'
@@ -31,7 +32,7 @@ export class BlogsController {
   @Get()
   async getBlogs(
     @Query() queryParams: BlogsQueryParams,
-  ): Promise<Paginator<BlogViewModel[]> | HttpException> {
+  ): Promise<Paginator<BlogViewModel[]>> {
     const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
       queryParams
     const sortParams = {
@@ -49,9 +50,7 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async getBlogById(
-    @Param('id') id: string,
-  ): Promise<BlogViewModel | HttpException> {
+  async getBlogById(@Param('id') id: string): Promise<BlogViewModel> {
     if (!ObjectId.isValid(id)) {
       throw new NotFoundException()
     }
@@ -63,27 +62,26 @@ export class BlogsController {
   }
 
   @Post()
-  async createBlog(
-    @Body() body: BlogInputModel,
-  ): Promise<BlogViewModel | HttpException> {
+  async createBlog(@Body() body: BlogInputModel): Promise<BlogViewModel> {
     const { statusCode, data: createdBlogId } =
       await this.blogsService.createBlog(body)
-    switch (statusCode) {
-      case StatusCode.Created: {
-        const blog = await this.blogsQueryRepository.getBlogById(createdBlogId!)
-        if (!blog) {
-          throw new BadRequestException()
-        }
-        return blog
-      }
-      default: {
-        throw new InternalServerErrorException()
-      }
+    handleExceptions(statusCode)
+    const blog = await this.blogsQueryRepository.getBlogById(createdBlogId!)
+    if (!blog) {
+      throw new BadRequestException()
     }
+    return blog
   }
 
-  @Put()
-  async updateBlog() {}
+  @Put(':id')
+  @HttpCode(204)
+  async updateBlog(@Param('id') id: string, @Body() body: BlogInputModel) {
+    if (!ObjectId.isValid(id)) {
+      throw new NotFoundException()
+    }
+    const { statusCode } = await this.blogsService.updateBlog(id, body)
+    handleExceptions(statusCode)
+  }
 
   @Delete(':id')
   @HttpCode(204)
@@ -92,8 +90,24 @@ export class BlogsController {
       throw new NotFoundException()
     }
     const { statusCode } = await this.blogsService.deleteBlog(id)
-    if (statusCode === StatusCode.NotFound) {
-      throw new NotFoundException()
-    }
+    handleExceptions(statusCode)
+  }
+}
+
+export function handleExceptions(statusCode: StatusCode) {
+  if (statusCode === StatusCode.BadRequest) {
+    throw new BadRequestException()
+  }
+  if (statusCode === StatusCode.Unauthorized) {
+    throw new UnauthorizedException()
+  }
+  if (statusCode === StatusCode.Forbidden) {
+    throw new ForbiddenException()
+  }
+  if (statusCode === StatusCode.NotFound) {
+    throw new NotFoundException()
+  }
+  if (statusCode === StatusCode.ServerError) {
+    throw new InternalServerErrorException()
   }
 }

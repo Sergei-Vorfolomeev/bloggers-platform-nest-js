@@ -31,4 +31,27 @@ export class BlogsService {
     }
     return new InterLayerObject(StatusCode.NoContent)
   }
+
+  async updateBlog(
+    id: string,
+    body: BlogInputModel,
+  ): Promise<InterLayerObject> {
+    const { name, description, websiteUrl } = body
+    const blog = await this.blogsRepository.getBlogById(id)
+    if (!blog) {
+      return new InterLayerObject(StatusCode.NotFound)
+    }
+    const updatedBlog: BlogDBModel = {
+      name,
+      description,
+      websiteUrl,
+      createdAt: blog.createdAt,
+      isMembership: blog.isMembership,
+    }
+    const isUpdated = await this.blogsRepository.updateBlog(id, updatedBlog)
+    if (!isUpdated) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    return new InterLayerObject(StatusCode.NoContent)
+  }
 }
