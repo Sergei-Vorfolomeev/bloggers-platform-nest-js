@@ -5,7 +5,7 @@ import { BlogsRepository } from './features/blogs/infrastructure/blogs.repositor
 import { BlogsQueryRepository } from './features/blogs/infrastructure/blogs.query.repository'
 import { MongooseModule } from '@nestjs/mongoose'
 import { appSettings } from './settings/app.settings'
-import { Blog, BlogSchema } from './features/blogs/domain/blog.model'
+import { Blog, BlogSchema } from './features/blogs/domain/blog.entity'
 
 @Module({
   imports: [

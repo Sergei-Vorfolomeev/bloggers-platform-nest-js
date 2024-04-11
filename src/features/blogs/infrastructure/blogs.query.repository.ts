@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BlogSortParams } from '../domain/types'
-import { Blog, BlogDocument } from '../domain/blog.model'
+import { Blog, BlogDocument } from '../domain/blog.entity'
 import { blogMapper } from './blog.mapper'
 import { BlogViewModel } from '../api/models/blog.output.models'
 import { Paginator } from '../../../base/types'
@@ -10,7 +10,9 @@ import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocument>) {}
+  constructor(
+    @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
+  ) {}
 
   async getBlogs(
     sortParams: BlogSortParams,

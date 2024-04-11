@@ -1,3 +1,10 @@
+export type QueryParams = {
+  sortBy?: string
+  sortDirection?: 'asc' | 'desc'
+  pageNumber?: number
+  pageSize?: number
+}
+
 export type SortParams = {
   sortBy: string
   sortDirection: 'asc' | 'desc'
