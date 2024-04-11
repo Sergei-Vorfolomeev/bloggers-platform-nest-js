@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { BlogSortParams } from '../domain/types'
 import { Blog, BlogDocument } from '../domain/blog.entity'
 import { blogMapper } from './blog.mapper'
-import { BlogViewModel } from '../api/models/blog.output.models'
+import { BlogOutputModel } from '../api/models/blog.output.models'
 import { Paginator } from '../../../base/types'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -16,7 +16,7 @@ export class BlogsQueryRepository {
 
   async getBlogs(
     sortParams: BlogSortParams,
-  ): Promise<Paginator<BlogViewModel[]> | null> {
+  ): Promise<Paginator<BlogOutputModel[]> | null> {
     try {
       const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
         sortParams
@@ -51,7 +51,7 @@ export class BlogsQueryRepository {
     }
   }
 
-  async getBlogById(id: string): Promise<BlogViewModel | null> {
+  async getBlogById(id: string): Promise<BlogOutputModel | null> {
     try {
       const blog = await this.blogModel.findById(new ObjectId(id)).lean().exec()
       if (!blog) {

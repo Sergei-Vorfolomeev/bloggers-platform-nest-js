@@ -6,6 +6,10 @@ import { BlogsQueryRepository } from './features/blogs/infrastructure/blogs.quer
 import { MongooseModule } from '@nestjs/mongoose'
 import { appSettings } from './settings/app.settings'
 import { Blog, BlogSchema } from './features/blogs/domain/blog.entity'
+import { PostsQueryRepository } from './features/posts/infrastructure/posts.query.repository'
+import { PostsService } from './features/posts/application/posts.service'
+import { Post, PostSchema } from './features/posts/domain/post.entity'
+import { PostsRepository } from './features/posts/infrastructure/posts.repository'
 
 @Module({
   imports: [
@@ -13,8 +17,16 @@ import { Blog, BlogSchema } from './features/blogs/domain/blog.entity'
       dbName: 'bloggers-platform',
     }),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
+    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
   ],
   controllers: [BlogsController],
-  providers: [BlogsService, BlogsRepository, BlogsQueryRepository],
+  providers: [
+    BlogsService,
+    PostsService,
+    BlogsRepository,
+    BlogsQueryRepository,
+    PostsRepository,
+    PostsQueryRepository,
+  ],
 })
 export class AppModule {}

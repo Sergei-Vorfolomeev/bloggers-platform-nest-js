@@ -3,10 +3,15 @@ import { BlogsRepository } from '../infrastructure/blogs.repository'
 import { BlogInputModel } from '../api/models/blog.input.models'
 import { BlogDBModel } from '../domain/types'
 import { InterLayerObject, StatusCode } from '../../../base/interlayer-object'
+import { PostsService } from '../../posts/application/posts.service'
+import { PostInputModel } from '../../posts/api/models/post.input.model'
 
 @Injectable()
 export class BlogsService {
-  constructor(private readonly blogsRepository: BlogsRepository) {}
+  constructor(
+    private readonly blogsRepository: BlogsRepository,
+    private readonly postsService: PostsService,
+  ) {}
 
   async createBlog(body: BlogInputModel): Promise<InterLayerObject<string>> {
     const { name, description, websiteUrl } = body
@@ -53,5 +58,23 @@ export class BlogsService {
       return new InterLayerObject(StatusCode.ServerError)
     }
     return new InterLayerObject(StatusCode.NoContent)
+  }
+
+  async createPostInsideBlog(
+    blogId: string,
+    body: Omit<PostInputModel, 'blogId'>,
+  ): Promise<InterLayerObject<string>> {
+    const { title, shortDescription, content } = body
+    const blog = await this.blogsRepository.getBlogById(blogId)
+    if (!blog) {
+      return new InterLayerObject(StatusCode.NotFound)
+    }
+    const inputDataWithBlogId: PostInputModel = {
+      title,
+      shortDescription,
+      content,
+      blogId: blog._id.toString(),
+    }
+    return await this.postsService.createPost(inputDataWithBlogId)
   }
 }

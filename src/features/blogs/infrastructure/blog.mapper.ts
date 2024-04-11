@@ -1,8 +1,8 @@
 import { BlogDBModel } from '../domain/types'
-import { BlogViewModel } from '../api/models/blog.output.models'
+import { BlogOutputModel } from '../api/models/blog.output.models'
 import { WithId } from 'mongodb'
 
-export const blogMapper = (blog: WithId<BlogDBModel>): BlogViewModel => {
+export const blogMapper = (blog: WithId<BlogDBModel>): BlogOutputModel => {
   return {
     id: blog._id.toString(),
     name: blog.name,
