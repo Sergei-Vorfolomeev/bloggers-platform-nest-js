@@ -5,12 +5,44 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { Post, PostDocument } from '../domain/post.entity'
 import { Injectable } from '@nestjs/common'
+import { Paginator, SortParams } from '../../../base/types'
+import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query.repository'
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
+    private readonly blogsQueryRepository: BlogsQueryRepository,
   ) {}
+
+  async getPostsWithFilter(
+    filter: object,
+    sortParams: SortParams,
+    userId: string | null,
+  ): Promise<Paginator<PostOutputModel[]> | null> {
+    try {
+      const { sortBy, sortDirection, pageSize, pageNumber } = sortParams
+      const posts = await this.postModel
+        .find(filter)
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .sort({ [sortBy]: sortDirection })
+        .lean()
+        .exec()
+      const totalCount = await this.postModel.countDocuments(filter)
+      const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
+      return {
+        items: await this.mapToView(posts, userId),
+        page: pageNumber,
+        pageSize,
+        pagesCount,
+        totalCount,
+      }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  }
 
   async getPostById(
     postId: string,
@@ -26,6 +58,24 @@ export class PostsQueryRepository {
       }
       const res = await this.mapToView([post], userId)
       return res[0]
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  }
+
+  async getPostsByBlogId(blogId: string, sortParams: SortParams, userId: any) {
+    try {
+      const blog = await this.blogsQueryRepository.getBlogById(blogId)
+      if (!blog) {
+        return null
+      }
+      const filter = {
+        blogId: {
+          $eq: blog.id,
+        },
+      }
+      return await this.getPostsWithFilter(filter, sortParams, userId)
     } catch (e) {
       console.error(e)
       return null

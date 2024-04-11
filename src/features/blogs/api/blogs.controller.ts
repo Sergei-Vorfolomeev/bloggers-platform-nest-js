@@ -15,7 +15,7 @@ import {
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository'
 import { BlogOutputModel } from './models/blog.output.models'
 import { BlogInputModel, BlogsQueryParams } from './models/blog.input.models'
-import { Paginator } from '../../../base/types'
+import { Paginator, QueryParams } from '../../../base/types'
 import { ObjectId } from 'mongodb'
 import { BlogsService } from '../application/blogs.service'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
@@ -93,6 +93,37 @@ export class BlogsController {
     }
     const { statusCode } = await this.blogsService.deleteBlog(id)
     handleExceptions(statusCode)
+  }
+
+  @Get(':id/posts')
+  async getPostsByBlogId(
+    @Param('id') blogId: string,
+    @Query() queryParams: QueryParams,
+  ) {
+    const { sortBy, sortDirection, pageNumber, pageSize } = queryParams
+    if (!ObjectId.isValid(blogId)) {
+      throw new NotFoundException()
+    }
+    const userId = null
+    // if (req.headers.authorization) {
+    //   const token = req.headers.authorization.split(' ')[1]
+    //   userId = await this.usersService.getUserId(token)
+    // }
+    const sortParams = {
+      sortBy: sortBy ?? 'createdAt',
+      sortDirection: sortDirection ?? 'desc',
+      pageNumber: pageNumber ? +pageNumber : 1,
+      pageSize: pageSize ? +pageSize : 10,
+    }
+    const posts = await this.postsQueryRepository.getPostsByBlogId(
+      blogId,
+      sortParams,
+      userId,
+    )
+    if (!posts) {
+      throw new NotFoundException()
+    }
+    return posts
   }
 
   @Post(':id/posts')
