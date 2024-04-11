@@ -2,8 +2,9 @@ import {
   Controller,
   Delete,
   Get,
-  HttpExceptionOptions,
+  HttpException,
   InternalServerErrorException,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -13,6 +14,7 @@ import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository'
 import { BlogViewModel } from './models/blog.output.models'
 import { BlogsQueryParams } from './models/blog.input.models'
 import { Paginator } from '../../../base/types'
+import { ObjectId } from 'mongodb'
 
 @Controller('blogs')
 export class BlogsController {
@@ -21,7 +23,7 @@ export class BlogsController {
   @Get()
   async getBlogs(
     @Query() queryParams: BlogsQueryParams,
-  ): Promise<Paginator<BlogViewModel[]> | HttpExceptionOptions> {
+  ): Promise<Paginator<BlogViewModel[]> | HttpException> {
     const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
       queryParams
     const sortParams = {
@@ -39,7 +41,18 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async getBlogById(@Param() id: string) {}
+  async getBlogById(
+    @Param() id: string,
+  ): Promise<BlogViewModel | HttpException> {
+    if (!ObjectId.isValid(id)) {
+      return new NotFoundException()
+    }
+    const blog = await this.blogsQueryRepository.getBlogById(id)
+    if (!blog) {
+      return new NotFoundException()
+    }
+    return blog
+  }
 
   @Post()
   async createBlog() {}

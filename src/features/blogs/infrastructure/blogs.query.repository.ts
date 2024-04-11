@@ -6,6 +6,7 @@ import { BlogViewModel } from '../api/models/blog.output.models'
 import { Paginator } from '../../../base/types'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
+import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -42,6 +43,19 @@ export class BlogsQueryRepository {
         pagesCount,
         totalCount,
       }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  }
+
+  async getBlogById(id: string): Promise<BlogViewModel | null> {
+    try {
+      const blog = await this.blogModel.findById(new ObjectId(id)).lean().exec()
+      if (!blog) {
+        return null
+      }
+      return blogMapper(blog)
     } catch (e) {
       console.error(e)
       return null
