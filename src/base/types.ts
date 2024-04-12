@@ -19,3 +19,12 @@ export type Paginator<T> = {
   totalCount: number
   items: T
 }
+
+export type FieldErrorType = {
+  message: string
+  field: string
+}
+
+export type APIErrorResult = {
+  errorsMessages: FieldErrorType[]
+}
