@@ -46,4 +46,12 @@ export class PostsService {
     }
     return new InterLayerObject(StatusCode.Created, null, createdPostId)
   }
+
+  async deletePost(postId: string): Promise<InterLayerObject> {
+    const isDeleted = await this.postsRepository.deletePost(postId)
+    if (!isDeleted) {
+      return new InterLayerObject(StatusCode.NotFound)
+    }
+    return new InterLayerObject(StatusCode.NoContent)
+  }
 }

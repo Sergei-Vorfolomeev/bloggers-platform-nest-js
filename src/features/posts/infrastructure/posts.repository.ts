@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Post, PostDocument } from '../domain/post.entity'
 import { Model } from 'mongoose'
 import { Injectable } from '@nestjs/common'
+import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class PostsRepository {
@@ -18,6 +19,16 @@ export class PostsRepository {
     } catch (e) {
       console.log(e)
       return null
+    }
+  }
+
+  async deletePost(postId: string): Promise<boolean> {
+    try {
+      const res = await this.postModel.deleteOne({ _id: new ObjectId(postId) })
+      return res.deletedCount === 1
+    } catch (e) {
+      console.error(e)
+      return false
     }
   }
 }
