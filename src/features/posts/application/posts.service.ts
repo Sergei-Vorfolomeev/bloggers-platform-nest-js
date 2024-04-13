@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { PostInputModel } from '../api/models/post.input.model'
+import { PostInputModelWithBlogId } from '../api/models/post.input.model'
 import { BlogsRepository } from '../../blogs/infrastructure/blogs.repository'
 import {
   ErrorsMessages,
@@ -17,7 +17,9 @@ export class PostsService {
     private readonly postsRepository: PostsRepository,
   ) {}
 
-  async createPost(data: PostInputModel): Promise<InterLayerObject<string>> {
+  async createPost(
+    data: PostInputModelWithBlogId,
+  ): Promise<InterLayerObject<string>> {
     const { title, shortDescription, content, blogId } = data
     const blog = await this.blogsRepository.getBlogById(blogId)
     if (!blog) {

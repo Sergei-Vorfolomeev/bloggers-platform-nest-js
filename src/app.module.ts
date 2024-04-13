@@ -10,6 +10,7 @@ import { PostsQueryRepository } from './features/posts/infrastructure/posts.quer
 import { PostsService } from './features/posts/application/posts.service'
 import { Post, PostSchema } from './features/posts/domain/post.entity'
 import { PostsRepository } from './features/posts/infrastructure/posts.repository'
+import { PostsController } from './features/posts/api/posts.controller'
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { PostsRepository } from './features/posts/infrastructure/posts.repositor
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
   ],
-  controllers: [BlogsController],
+  controllers: [BlogsController, PostsController],
   providers: [
     BlogsService,
     PostsService,

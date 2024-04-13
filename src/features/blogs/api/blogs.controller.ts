@@ -52,11 +52,11 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async getBlogById(@Param('id') id: string): Promise<BlogOutputModel> {
-    if (!ObjectId.isValid(id)) {
+  async getBlogById(@Param('id') blogId: string): Promise<BlogOutputModel> {
+    if (!ObjectId.isValid(blogId)) {
       throw new NotFoundException()
     }
-    const blog = await this.blogsQueryRepository.getBlogById(id)
+    const blog = await this.blogsQueryRepository.getBlogById(blogId)
     if (!blog) {
       throw new NotFoundException()
     }
@@ -77,21 +77,21 @@ export class BlogsController {
 
   @Put(':id')
   @HttpCode(204)
-  async updateBlog(@Param('id') id: string, @Body() body: BlogInputModel) {
-    if (!ObjectId.isValid(id)) {
+  async updateBlog(@Param('id') blogId: string, @Body() body: BlogInputModel) {
+    if (!ObjectId.isValid(blogId)) {
       throw new NotFoundException()
     }
-    const { statusCode } = await this.blogsService.updateBlog(id, body)
+    const { statusCode } = await this.blogsService.updateBlog(blogId, body)
     handleExceptions(statusCode)
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteBlog(@Param('id') id: string) {
-    if (!ObjectId.isValid(id)) {
+  async deleteBlog(@Param('id') blogId: string) {
+    if (!ObjectId.isValid(blogId)) {
       throw new NotFoundException()
     }
-    const { statusCode } = await this.blogsService.deleteBlog(id)
+    const { statusCode } = await this.blogsService.deleteBlog(blogId)
     handleExceptions(statusCode)
   }
 
@@ -129,7 +129,7 @@ export class BlogsController {
   @Post(':id/posts')
   async createPostInsideBlog(
     @Param('id') blogId: string,
-    @Body() body: Omit<PostInputModel, 'blogId'>,
+    @Body() body: PostInputModel,
   ): Promise<PostOutputModel> {
     if (!ObjectId.isValid(blogId)) {
       throw new NotFoundException()

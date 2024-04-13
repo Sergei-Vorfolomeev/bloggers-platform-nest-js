@@ -4,7 +4,10 @@ import { BlogInputModel } from '../api/models/blog.input.models'
 import { BlogDBModel } from '../domain/types'
 import { InterLayerObject, StatusCode } from '../../../base/interlayer-object'
 import { PostsService } from '../../posts/application/posts.service'
-import { PostInputModel } from '../../posts/api/models/post.input.model'
+import {
+  PostInputModel,
+  PostInputModelWithBlogId,
+} from '../../posts/api/models/post.input.model'
 
 @Injectable()
 export class BlogsService {
@@ -69,7 +72,7 @@ export class BlogsService {
     if (!blog) {
       return new InterLayerObject(StatusCode.NotFound)
     }
-    const inputDataWithBlogId: PostInputModel = {
+    const inputDataWithBlogId: PostInputModelWithBlogId = {
       title,
       shortDescription,
       content,

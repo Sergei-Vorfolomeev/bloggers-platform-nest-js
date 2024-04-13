@@ -44,6 +44,19 @@ export class PostsQueryRepository {
     }
   }
 
+  async getPosts(
+    sortParams: SortParams,
+    userId: string | null,
+  ): Promise<Paginator<PostOutputModel[]> | null> {
+    try {
+      const filter = {}
+      return await this.getPostsWithFilter(filter, sortParams, userId)
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  }
+
   async getPostById(
     postId: string,
     userId: string | null,
