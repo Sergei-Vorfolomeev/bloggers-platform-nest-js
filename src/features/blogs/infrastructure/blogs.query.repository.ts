@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common'
-import { BlogSortParams } from '../domain/types'
+import { BlogDBModel, BlogSortParams } from '../domain/types'
 import { Blog, BlogDocument } from '../domain/blog.entity'
-import { blogMapper } from './blog.mapper'
 import { BlogOutputModel } from '../api/models/blog.output.models'
 import { Paginator } from '../../../base/types'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { ObjectId } from 'mongodb'
+import { ObjectId, WithId } from 'mongodb'
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -39,7 +38,7 @@ export class BlogsQueryRepository {
       const totalCount = await this.blogModel.countDocuments(filter)
       const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
       return {
-        items: blogs.map(blogMapper),
+        items: blogs.map(this.mapToView),
         page: pageNumber,
         pageSize,
         pagesCount,
@@ -57,10 +56,21 @@ export class BlogsQueryRepository {
       if (!blog) {
         return null
       }
-      return blogMapper(blog)
+      return this.mapToView(blog)
     } catch (e) {
       console.error(e)
       return null
+    }
+  }
+
+  mapToView(blog: WithId<BlogDBModel>): BlogOutputModel {
+    return {
+      id: blog._id.toString(),
+      name: blog.name,
+      description: blog.description,
+      websiteUrl: blog.websiteUrl,
+      createdAt: blog.createdAt,
+      isMembership: blog.isMembership,
     }
   }
 }

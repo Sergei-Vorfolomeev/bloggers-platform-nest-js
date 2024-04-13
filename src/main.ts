@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { BadRequestException, ValidationPipe } from '@nestjs/common'
 import { HttpExceptionFilter } from './infrastructure/exception-filters/http-exception.filter'
-import { APIErrorResult } from './base/types'
+import { FieldErrorType } from './base/types'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -10,8 +10,17 @@ async function bootstrap() {
     new ValidationPipe({
       stopAtFirstError: true,
       exceptionFactory: (errors) => {
-        console.log(errors)
-        throw new BadRequestException(errors)
+        const errorsMessages: FieldErrorType[] = []
+        errors.forEach((el) => {
+          const constraintsKeys = Object.keys(el.constraints!)
+          constraintsKeys.forEach((ckey) => {
+            errorsMessages.push({
+              field: el.property,
+              message: el.constraints![ckey],
+            })
+          })
+        })
+        throw new BadRequestException(errorsMessages)
       },
     }),
   )
