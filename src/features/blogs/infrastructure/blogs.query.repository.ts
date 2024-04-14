@@ -63,7 +63,7 @@ export class BlogsQueryRepository {
     }
   }
 
-  mapToView(blog: WithId<BlogDBModel>): BlogOutputModel {
+  private mapToView(blog: WithId<BlogDBModel>): BlogOutputModel {
     return {
       id: blog._id.toString(),
       name: blog.name,

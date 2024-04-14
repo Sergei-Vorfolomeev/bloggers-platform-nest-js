@@ -95,7 +95,7 @@ export class PostsQueryRepository {
     }
   }
 
-  async mapToView(
+  private async mapToView(
     posts: WithId<PostDBModel>[],
     userId: string | null,
   ): Promise<PostOutputModel[]> {

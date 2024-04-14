@@ -11,6 +11,9 @@ import { PostsService } from './features/posts/application/posts.service'
 import { Post, PostSchema } from './features/posts/domain/post.entity'
 import { PostsRepository } from './features/posts/infrastructure/posts.repository'
 import { PostsController } from './features/posts/api/posts.controller'
+import { UsersQueryRepository } from './features/users/infrastructure/users.query.repository'
+import { UsersRepository } from './features/users/infrastructure/users.repository'
+import { User, UserSchema } from './features/users/domain/user.entity'
 
 @Module({
   imports: [
@@ -19,6 +22,7 @@ import { PostsController } from './features/posts/api/posts.controller'
     }),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [BlogsController, PostsController],
   providers: [
@@ -28,6 +32,8 @@ import { PostsController } from './features/posts/api/posts.controller'
     BlogsQueryRepository,
     PostsRepository,
     PostsQueryRepository,
+    UsersRepository,
+    UsersQueryRepository,
   ],
 })
 export class AppModule {}
