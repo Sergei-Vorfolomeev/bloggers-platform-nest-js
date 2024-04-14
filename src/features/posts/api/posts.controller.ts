@@ -9,6 +9,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Put,
   Query,
 } from '@nestjs/common'
 import { Paginator, QueryParams } from '../../../base/types'
@@ -18,7 +19,6 @@ import { ObjectId } from 'mongodb'
 import { PostInputModelWithBlogId } from './models/post.input.model'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
 import { PostsService } from '../application/posts.service'
-import { StatusCode } from '../../../base/interlayer-object'
 
 @Controller('posts')
 export class PostsController {
@@ -87,6 +87,19 @@ export class PostsController {
       throw new BadRequestException()
     }
     return post
+  }
+
+  @Put(':id')
+  @HttpCode(204)
+  async updatePost(
+    @Param('id') postId: string,
+    @Body() body: PostInputModelWithBlogId,
+  ) {
+    if (!ObjectId.isValid(postId)) {
+      throw new NotFoundException()
+    }
+    const { statusCode } = await this.postsService.updatePost(postId, body)
+    handleExceptions(statusCode)
   }
 
   @HttpCode(204)

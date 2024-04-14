@@ -47,6 +47,30 @@ export class PostsService {
     return new InterLayerObject(StatusCode.Created, null, createdPostId)
   }
 
+  async updatePost(
+    postId: string,
+    body: PostInputModelWithBlogId,
+  ): Promise<InterLayerObject> {
+    const { title, shortDescription, content, blogId } = body
+    const post = await this.postsRepository.getPostById(postId)
+    if (!post) {
+      return new InterLayerObject(StatusCode.NotFound)
+    }
+    const newPost: PostDBModel = {
+      title,
+      shortDescription,
+      content,
+      blogId,
+      blogName: post.blogName,
+      createdAt: post.createdAt,
+    }
+    const isUpdated = await this.postsRepository.updatePost(postId, newPost)
+    if (!isUpdated) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    return new InterLayerObject(StatusCode.NoContent)
+  }
+
   async deletePost(postId: string): Promise<InterLayerObject> {
     const isDeleted = await this.postsRepository.deletePost(postId)
     if (!isDeleted) {

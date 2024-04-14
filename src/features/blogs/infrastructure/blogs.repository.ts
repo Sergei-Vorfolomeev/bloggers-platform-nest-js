@@ -41,10 +41,10 @@ export class BlogsRepository {
     }
   }
 
-  async updateBlog(id: string, blog: BlogDBModel): Promise<boolean> {
+  async updateBlog(blogId: string, blog: BlogDBModel): Promise<boolean> {
     try {
       const res = await this.blogModel.updateOne(
-        { _id: new ObjectId(id) },
+        { _id: new ObjectId(blogId) },
         blog,
       )
       return res.matchedCount === 1

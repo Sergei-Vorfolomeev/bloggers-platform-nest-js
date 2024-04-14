@@ -41,11 +41,11 @@ export class BlogsService {
   }
 
   async updateBlog(
-    id: string,
+    blogId: string,
     body: BlogInputModel,
   ): Promise<InterLayerObject> {
     const { name, description, websiteUrl } = body
-    const blog = await this.blogsRepository.getBlogById(id)
+    const blog = await this.blogsRepository.getBlogById(blogId)
     if (!blog) {
       return new InterLayerObject(StatusCode.NotFound)
     }
@@ -56,7 +56,7 @@ export class BlogsService {
       createdAt: blog.createdAt,
       isMembership: blog.isMembership,
     }
-    const isUpdated = await this.blogsRepository.updateBlog(id, updatedBlog)
+    const isUpdated = await this.blogsRepository.updateBlog(blogId, updatedBlog)
     if (!isUpdated) {
       return new InterLayerObject(StatusCode.ServerError)
     }
