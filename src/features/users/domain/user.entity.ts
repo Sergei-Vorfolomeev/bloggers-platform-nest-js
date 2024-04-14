@@ -1,5 +1,6 @@
 import { HydratedDocument } from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { EmailConfirmationType } from './types'
 
 export type UserDocument = HydratedDocument<User>
 
@@ -26,6 +27,7 @@ export class User {
   createdAt: string
 
   @Prop({
+    type: EmailConfirmationType,
     required: true,
   })
   emailConfirmation: {
@@ -34,7 +36,11 @@ export class User {
     isConfirmed: boolean
   }
 
-  @Prop()
+  @Prop({
+    type: {
+      recoveryCode: String,
+    },
+  })
   passwordRecovery: {
     recoveryCode: string
   }

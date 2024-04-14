@@ -11,7 +11,7 @@ export type UserDBModel = {
   }
 }
 
-type EmailConfirmationType = {
+export class EmailConfirmationType {
   confirmationCode: string
   expirationDate: Date
   isConfirmed: boolean

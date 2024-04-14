@@ -14,6 +14,9 @@ import { PostsController } from './features/posts/api/posts.controller'
 import { UsersQueryRepository } from './features/users/infrastructure/users.query.repository'
 import { UsersRepository } from './features/users/infrastructure/users.repository'
 import { User, UserSchema } from './features/users/domain/user.entity'
+import { UsersController } from './features/users/api/users.controller'
+import { UsersService } from './features/users/application/users.service'
+import { BcryptAdapter } from './base/adapters/bcrypt.adapter'
 
 @Module({
   imports: [
@@ -24,10 +27,12 @@ import { User, UserSchema } from './features/users/domain/user.entity'
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
-  controllers: [BlogsController, PostsController],
+  controllers: [BlogsController, PostsController, UsersController],
   providers: [
     BlogsService,
     PostsService,
+    UsersService,
+    BcryptAdapter,
     BlogsRepository,
     BlogsQueryRepository,
     PostsRepository,
