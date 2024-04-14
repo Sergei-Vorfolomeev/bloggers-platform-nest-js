@@ -2,7 +2,9 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   InternalServerErrorException,
   NotFoundException,
   Param,
@@ -77,5 +79,15 @@ export class UsersController {
       throw new BadRequestException()
     }
     return createdUser
+  }
+
+  @HttpCode(204)
+  @Delete(':id')
+  async deleteUser(@Param('id') userId: string) {
+    if (!ObjectId.isValid(userId)) {
+      throw new NotFoundException()
+    }
+    const { statusCode } = await this.usersService.deleteUser(userId)
+    handleExceptions(statusCode)
   }
 }

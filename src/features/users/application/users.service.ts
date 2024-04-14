@@ -37,4 +37,12 @@ export class UsersService {
     }
     return new InterLayerObject(StatusCode.Created, null, createdUserId)
   }
+
+  async deleteUser(userId: string): Promise<InterLayerObject> {
+    const isDeleted = await this.usersRepository.deleteUser(userId)
+    if (!isDeleted) {
+      return new InterLayerObject(StatusCode.NotFound)
+    }
+    return new InterLayerObject(StatusCode.NoContent)
+  }
 }
