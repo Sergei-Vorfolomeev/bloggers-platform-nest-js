@@ -17,14 +17,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       response.status(status).json({
         errorsMessages: errors.message,
       })
-    }
-    if (status === 401) {
+    } else {
       response.status(status).json({
         status: status,
         message: exception.message,
       })
-    } else {
-      response.status(status).json(exception)
     }
   }
 }

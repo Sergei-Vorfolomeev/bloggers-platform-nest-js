@@ -1,7 +1,6 @@
 import {
   CanActivate,
   ExecutionContext,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
@@ -13,10 +12,11 @@ export class BasicAuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest()
-    if (!request.headers.authorization) {
+    const auth = request.headers.authorization
+    if (!auth) {
       throw new UnauthorizedException()
     }
-    const [basic, token] = request.headers.authorization.split(' ')
+    const [basic, token] = auth.split(' ')
     if (basic !== 'Basic') {
       throw new UnauthorizedException()
     }
