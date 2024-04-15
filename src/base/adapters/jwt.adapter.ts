@@ -5,12 +5,14 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import { AppSettings } from '../../settings/app.settings'
 import { TokensPayload } from '../../features/auth/application/types'
 import { CryptoAdapter } from './crypto.adapter'
+import { UsersRepository } from '../../features/users/infrastructure/users.repository'
 
 @Injectable()
 export class JwtAdapter {
   constructor(
     protected readonly appSettings: AppSettings,
     protected readonly cryptoAdapter: CryptoAdapter,
+    protected readonly usersRepository: UsersRepository,
   ) {}
 
   createToken(
@@ -54,5 +56,29 @@ export class JwtAdapter {
     const refreshToken = this.createToken(user, deviceId, 'refresh')
     const encryptedRefreshToken = this.cryptoAdapter.encrypt(refreshToken)
     return { accessToken, refreshToken, encryptedRefreshToken }
+  }
+
+  async verifyRefreshToken(refreshToken: string) {
+    // const payload = await this.verifyToken(refreshToken, 'refresh')
+    // if (!payload) {
+    //   return null
+    // }
+    // const { userId, deviceId } = payload
+    // const user = await this.usersRepository.findUserById(userId)
+    // if (!user) {
+    //   return null
+    // }
+    // const device = await this.devicesRepository.findDeviceById(deviceId)
+    // if (!device) {
+    //   return null
+    // }
+    // const decryptedRefreshToken = this.cryptoAdapter.decrypt(
+    //   device.refreshToken,
+    // )
+    // const isMatched = refreshToken === decryptedRefreshToken
+    // if (!isMatched) {
+    //   return null
+    // }
+    // return { user, device }
   }
 }

@@ -1,4 +1,4 @@
-import { ErrorsMessages, StatusCode } from '../interlayer-object'
+import { FieldError, StatusCode } from '../interlayer-object'
 import {
   BadRequestException,
   ForbiddenException,
@@ -9,21 +9,21 @@ import {
 
 export function handleExceptions(
   statusCode: StatusCode,
-  message?: ErrorsMessages | string | null,
+  message?: FieldError[] | string | null,
 ) {
   if (statusCode === StatusCode.BadRequest) {
     throw new BadRequestException(message)
   }
   if (statusCode === StatusCode.Unauthorized) {
-    throw new UnauthorizedException()
+    throw new UnauthorizedException(message)
   }
   if (statusCode === StatusCode.Forbidden) {
-    throw new ForbiddenException()
+    throw new ForbiddenException(message)
   }
   if (statusCode === StatusCode.NotFound) {
-    throw new NotFoundException()
+    throw new NotFoundException(message)
   }
   if (statusCode === StatusCode.ServerError) {
-    throw new InternalServerErrorException()
+    throw new InternalServerErrorException(message)
   }
 }

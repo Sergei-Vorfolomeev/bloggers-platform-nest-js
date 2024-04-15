@@ -1,24 +1,16 @@
 export class InterLayerObject<T = null> {
   statusCode: StatusCode
-  errorsMessages: ErrorsMessages | string | null | undefined
+  error: FieldError[] | string | null | undefined
   data: T | undefined
 
   constructor(
     statusCode: StatusCode,
-    errorsMessages?: ErrorsMessages | string | null,
+    error?: FieldError | string | null,
     data?: T,
   ) {
     this.statusCode = statusCode
-    this.errorsMessages = errorsMessages
+    this.error = error instanceof FieldError ? [error] : error
     this.data = data
-  }
-}
-
-export class ErrorsMessages {
-  public errorsMessages: FieldErrorType[]
-
-  constructor(...data: FieldErrorType[]) {
-    this.errorsMessages = [...data]
   }
 }
 
@@ -41,9 +33,4 @@ export enum StatusCode {
   BadRequest,
   NotFound,
   ServerError,
-}
-
-export type FieldErrorType = {
-  message: string
-  field: string
 }

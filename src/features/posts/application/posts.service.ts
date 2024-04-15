@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { PostInputModelWithBlogId } from '../api/models/post.input.model'
 import { BlogsRepository } from '../../blogs/infrastructure/blogs.repository'
 import {
-  ErrorsMessages,
   FieldError,
   InterLayerObject,
   StatusCode,
@@ -25,7 +24,7 @@ export class PostsService {
     if (!blog) {
       return new InterLayerObject(
         StatusCode.BadRequest,
-        new ErrorsMessages(new FieldError('blogId', "This blog doesn't exist")),
+        new FieldError('blogId', "This blog doesn't exist"),
       )
     }
     const newPost: PostDBModel = {
