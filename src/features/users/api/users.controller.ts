@@ -16,7 +16,6 @@ import { Paginator } from '../../../base/types'
 import { UserOutputModel } from './models/user.output.model'
 import { UserInputModel, UsersQueryParams } from './models/user.input.model'
 import { ObjectId } from 'mongodb'
-import { StatusCode } from '../../../base/interlayer-object'
 import { UsersService } from '../application/users.service'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
 

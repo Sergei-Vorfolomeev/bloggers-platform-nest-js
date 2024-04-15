@@ -4,7 +4,6 @@ import { BlogsService } from './features/blogs/application/blogs.service'
 import { BlogsRepository } from './features/blogs/infrastructure/blogs.repository'
 import { BlogsQueryRepository } from './features/blogs/infrastructure/blogs.query.repository'
 import { MongooseModule } from '@nestjs/mongoose'
-import { appSettings } from './settings/app.settings'
 import { Blog, BlogSchema } from './features/blogs/domain/blog.entity'
 import { PostsQueryRepository } from './features/posts/infrastructure/posts.query.repository'
 import { PostsService } from './features/posts/application/posts.service'
@@ -17,10 +16,11 @@ import { User, UserSchema } from './features/users/domain/user.entity'
 import { UsersController } from './features/users/api/users.controller'
 import { UsersService } from './features/users/application/users.service'
 import { BcryptAdapter } from './base/adapters/bcrypt.adapter'
+import { AppSettings } from './settings/app.settings'
 
 @Module({
   imports: [
-    MongooseModule.forRoot(appSettings.MONGO_URI, {
+    MongooseModule.forRoot(AppSettings.MONGO_URI, {
       dbName: 'bloggers-platform',
     }),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
@@ -29,6 +29,7 @@ import { BcryptAdapter } from './base/adapters/bcrypt.adapter'
   ],
   controllers: [BlogsController, PostsController, UsersController],
   providers: [
+    AppSettings,
     BlogsService,
     PostsService,
     UsersService,

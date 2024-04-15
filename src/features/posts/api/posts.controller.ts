@@ -11,6 +11,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common'
 import { Paginator, QueryParams } from '../../../base/types'
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository'
@@ -19,6 +20,7 @@ import { ObjectId } from 'mongodb'
 import { PostInputModelWithBlogId } from './models/post.input.model'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
 import { PostsService } from '../application/posts.service'
+import { BasicAuthGuard } from '../../../infrastructure/guards/basic-auth.guard'
 
 @Controller('posts')
 export class PostsController {
@@ -68,6 +70,7 @@ export class PostsController {
   }
 
   @Post()
+  @UseGuards(BasicAuthGuard)
   async createPost(
     @Body() body: PostInputModelWithBlogId,
   ): Promise<PostOutputModel> {
@@ -90,6 +93,7 @@ export class PostsController {
   }
 
   @Put(':id')
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async updatePost(
     @Param('id') postId: string,
@@ -102,8 +106,9 @@ export class PostsController {
     handleExceptions(statusCode)
   }
 
-  @HttpCode(204)
   @Delete(':id')
+  @UseGuards(BasicAuthGuard)
+  @HttpCode(204)
   async deletePost(@Param('id') postId: string) {
     if (!ObjectId.isValid(postId)) {
       throw new NotFoundException()
