@@ -1,4 +1,4 @@
-import { StatusCode } from '../interlayer-object'
+import { ErrorsMessages, StatusCode } from '../interlayer-object'
 import {
   BadRequestException,
   ForbiddenException,
@@ -7,9 +7,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 
-export function handleExceptions(statusCode: StatusCode) {
+export function handleExceptions(
+  statusCode: StatusCode,
+  message?: ErrorsMessages | string | null,
+) {
   if (statusCode === StatusCode.BadRequest) {
-    throw new BadRequestException()
+    throw new BadRequestException(message)
   }
   if (statusCode === StatusCode.Unauthorized) {
     throw new UnauthorizedException()

@@ -17,6 +17,11 @@ import { UsersController } from './features/users/api/users.controller'
 import { UsersService } from './features/users/application/users.service'
 import { BcryptAdapter } from './base/adapters/bcrypt.adapter'
 import { AppSettings } from './settings/app.settings'
+import { CryptoAdapter } from './base/adapters/crypto.adapter'
+import { AuthService } from './features/auth/application/auth.service'
+import { JwtAdapter } from './base/adapters/jwt.adapter'
+import { AuthController } from './features/auth/api/auth.controller'
+import { EmailAdapter } from './base/adapters/email.adapter'
 
 @Module({
   imports: [
@@ -27,19 +32,28 @@ import { AppSettings } from './settings/app.settings'
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
-  controllers: [BlogsController, PostsController, UsersController],
+  controllers: [
+    AuthController,
+    BlogsController,
+    PostsController,
+    UsersController,
+  ],
   providers: [
     AppSettings,
+    AuthService,
     BlogsService,
     PostsService,
     UsersService,
-    BcryptAdapter,
     BlogsRepository,
     BlogsQueryRepository,
     PostsRepository,
     PostsQueryRepository,
     UsersRepository,
     UsersQueryRepository,
+    JwtAdapter,
+    BcryptAdapter,
+    CryptoAdapter,
+    EmailAdapter,
   ],
 })
 export class AppModule {}

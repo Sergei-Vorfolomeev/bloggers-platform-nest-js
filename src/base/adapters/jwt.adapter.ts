@@ -3,10 +3,15 @@ import { WithId } from 'mongodb'
 import { UserDBModel } from '../../features/users/domain/types'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { AppSettings } from '../../settings/app.settings'
+import { TokensPayload } from '../../features/auth/application/types'
+import { CryptoAdapter } from './crypto.adapter'
 
 @Injectable()
 export class JwtAdapter {
-  constructor(protected readonly appSettings: AppSettings) {}
+  constructor(
+    protected readonly appSettings: AppSettings,
+    protected readonly cryptoAdapter: CryptoAdapter,
+  ) {}
 
   createToken(
     user: WithId<UserDBModel>,
@@ -39,5 +44,15 @@ export class JwtAdapter {
       console.error('Token verification has the following error: ' + error)
       return null
     }
+  }
+
+  async generateTokens(
+    user: WithId<UserDBModel>,
+    deviceId: string,
+  ): Promise<(TokensPayload & { encryptedRefreshToken: string }) | null> {
+    const accessToken = this.createToken(user, deviceId, 'access')
+    const refreshToken = this.createToken(user, deviceId, 'refresh')
+    const encryptedRefreshToken = this.cryptoAdapter.encrypt(refreshToken)
+    return { accessToken, refreshToken, encryptedRefreshToken }
   }
 }
