@@ -6,6 +6,7 @@ import { AppSettings } from '../../settings/app.settings'
 import { TokensPayload } from '../../features/auth/application/types'
 import { CryptoAdapter } from './crypto.adapter'
 import { UsersRepository } from '../../features/users/infrastructure/users.repository'
+import { DevicesRepository } from '../../features/devices/infrastructure/devices.repository'
 
 @Injectable()
 export class JwtAdapter {
@@ -13,6 +14,7 @@ export class JwtAdapter {
     protected readonly appSettings: AppSettings,
     protected readonly cryptoAdapter: CryptoAdapter,
     protected readonly usersRepository: UsersRepository,
+    protected readonly devicesRepository: DevicesRepository,
   ) {}
 
   createToken(
@@ -59,26 +61,26 @@ export class JwtAdapter {
   }
 
   async verifyRefreshToken(refreshToken: string) {
-    // const payload = await this.verifyToken(refreshToken, 'refresh')
-    // if (!payload) {
-    //   return null
-    // }
-    // const { userId, deviceId } = payload
-    // const user = await this.usersRepository.findUserById(userId)
-    // if (!user) {
-    //   return null
-    // }
-    // const device = await this.devicesRepository.findDeviceById(deviceId)
-    // if (!device) {
-    //   return null
-    // }
-    // const decryptedRefreshToken = this.cryptoAdapter.decrypt(
-    //   device.refreshToken,
-    // )
-    // const isMatched = refreshToken === decryptedRefreshToken
-    // if (!isMatched) {
-    //   return null
-    // }
-    // return { user, device }
+    const payload = await this.verifyToken(refreshToken, 'refresh')
+    if (!payload) {
+      return null
+    }
+    const { userId, deviceId } = payload
+    const user = await this.usersRepository.findUserById(userId)
+    if (!user) {
+      return null
+    }
+    const device = await this.devicesRepository.findDeviceById(deviceId)
+    if (!device) {
+      return null
+    }
+    const decryptedRefreshToken = this.cryptoAdapter.decrypt(
+      device.refreshToken,
+    )
+    const isMatched = refreshToken === decryptedRefreshToken
+    if (!isMatched) {
+      return null
+    }
+    return { user, device }
   }
 }

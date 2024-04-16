@@ -33,6 +33,9 @@ import { CommentsQueryRepository } from './features/comments/infrastructure/comm
 import { LikesRepository } from './features/likes/infrastructure/likes.repository'
 import { Like, LikeSchema } from './features/likes/domain/like.entity'
 import { CommentsController } from './features/comments/api/comments.controller'
+import { Device, DeviceSchema } from './features/devices/domain/device.entity'
+import { DevicesRepository } from './features/devices/infrastructure/devices.repository'
+import { DevicesController } from './features/devices/api/devices.controller'
 
 @Module({
   imports: [
@@ -44,6 +47,7 @@ import { CommentsController } from './features/comments/api/comments.controller'
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([{ name: Like.name, schema: LikeSchema }]),
+    MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
   ],
   controllers: [
     AuthController,
@@ -51,6 +55,7 @@ import { CommentsController } from './features/comments/api/comments.controller'
     PostsController,
     UsersController,
     CommentsController,
+    DevicesController,
   ],
   providers: [
     AppSettings,
@@ -70,6 +75,7 @@ import { CommentsController } from './features/comments/api/comments.controller'
     CommentsQueryRepository,
     LikesRepository,
     LikesQueryRepository,
+    DevicesRepository,
 
     JwtAdapter,
     BcryptAdapter,
