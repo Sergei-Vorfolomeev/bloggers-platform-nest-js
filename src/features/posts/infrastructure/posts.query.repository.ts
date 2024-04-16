@@ -2,17 +2,19 @@ import { PostOutputModel } from '../api/models/post.output.model'
 import { ObjectId, WithId } from 'mongodb'
 import { PostDBModel } from '../domain/types'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
-import { Post, PostDocument } from '../domain/post.entity'
+import { Post, PostModel } from '../domain/post.entity'
 import { Injectable } from '@nestjs/common'
 import { Paginator, SortParams } from '../../../base/types'
 import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query.repository'
+import { LikesQueryRepository } from '../../likes/infrastructure/likes.query.repository'
+import { LikeStatus } from '../../likes/domain/types'
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
-    @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
+    @InjectModel(Post.name) private readonly postModel: PostModel,
     private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly likesQueryRepository: LikesQueryRepository,
   ) {}
 
   async getPostsWithFilter(
@@ -101,16 +103,16 @@ export class PostsQueryRepository {
   ): Promise<PostOutputModel[]> {
     return await Promise.all(
       posts.map(async (post) => {
-        // let likeStatus: LikeStatus | null = null
-        // if (userId) {
-        //   likeStatus = await this.likesQueryRepository.getPostLikeStatus(
-        //     post._id.toString(),
-        //     userId,
-        //   )
-        // }
-        // const newestLikes = await this.likesQueryRepository.getNewestLikes(
-        //   post._id.toString(),
-        // )
+        let likeStatus: LikeStatus | null = null
+        if (userId) {
+          likeStatus = await this.likesQueryRepository.getPostLikeStatus(
+            post._id.toString(),
+            userId,
+          )
+        }
+        const newestLikes = await this.likesQueryRepository.getNewestLikes(
+          post._id.toString(),
+        )
         return {
           id: post._id.toString(),
           title: post.title,
@@ -119,12 +121,12 @@ export class PostsQueryRepository {
           blogId: post.blogId,
           blogName: post.blogName,
           createdAt: post.createdAt,
-          // extendedLikesInfo: {
-          //   likesCount: post.likesInfo.likesCount,
-          //   dislikesCount: post.likesInfo.dislikesCount,
-          // myStatus: likeStatus ?? 'None',
-          // newestLikes: newestLikes ?? [],
-          // },
+          extendedLikesInfo: {
+            likesCount: post.likesInfo.likesCount,
+            dislikesCount: post.likesInfo.dislikesCount,
+            myStatus: likeStatus ?? 'None',
+            newestLikes: newestLikes ?? [],
+          },
         }
       }),
     )

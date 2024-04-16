@@ -1,24 +1,14 @@
 import { HydratedDocument, Model } from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { LikeDBModel } from '../../likes/domain/types'
 import { LikeModelWithStatics } from '../../likes/domain/like.entity'
+import { LikeDBModel } from '../../likes/domain/types'
 
-export type PostDocument = HydratedDocument<Post>
-export type PostModel = Model<PostDocument>
-export type PostModelWithStatics = PostModel & PostStaticMethods
+export type CommentDocument = HydratedDocument<Comment>
+export type CommentModel = Model<CommentDocument>
+export type CommentModelWithStatics = CommentModel & CommentStaticMethods
 
 @Schema()
-export class Post {
-  @Prop({
-    required: true,
-  })
-  title: string
-
-  @Prop({
-    required: true,
-  })
-  shortDescription: string
-
+export class Comment {
   @Prop({
     required: true,
   })
@@ -26,13 +16,20 @@ export class Post {
 
   @Prop({
     required: true,
+    type: {
+      userId: { type: String, required: true },
+      userLogin: { type: String, required: true },
+    },
   })
-  blogId: string
+  commentatorInfo: {
+    userId: string
+    userLogin: string
+  }
 
   @Prop({
     required: true,
   })
-  blogName: string
+  postId: string
 
   @Prop({
     default: new Date().toISOString,
@@ -51,15 +48,18 @@ export class Post {
   }
 
   static async addLike(
-    postId: string,
+    commentId: string,
     like: LikeDBModel,
-    postModel: PostModel,
+    commentModel: CommentModel,
     likeModel: LikeModelWithStatics,
   ): Promise<string | null> {
     try {
       const newLike = new likeModel(like)
       await newLike.save()
-      await likeModel.increaseLikesCount<PostDocument>(postId, postModel)
+      await likeModel.increaseLikesCount<CommentDocument>(
+        commentId,
+        commentModel,
+      )
       return newLike._id.toString()
     } catch (e) {
       console.error(e)
@@ -68,15 +68,18 @@ export class Post {
   }
 
   static async addDislike(
-    postId: string,
+    commentId: string,
     dislike: LikeDBModel,
-    postModel: PostModel,
+    commentModel: CommentModel,
     likeModel: LikeModelWithStatics,
   ): Promise<string | null> {
     try {
       const newDislike = new likeModel(dislike)
       await newDislike.save()
-      await likeModel.increaseDislikesCount<PostDocument>(postId, postModel)
+      await likeModel.increaseDislikesCount<CommentDocument>(
+        commentId,
+        commentModel,
+      )
       return newDislike._id.toString()
     } catch (e) {
       console.error(e)
@@ -85,18 +88,21 @@ export class Post {
   }
 
   static async removeLike(
-    postId: string,
+    commentId: string,
     userId: string,
-    postModel: PostModel,
+    commentModel: CommentModel,
     likeModel: LikeModelWithStatics,
   ): Promise<boolean> {
     try {
       const res = await likeModel.deleteOne({
-        postId,
+        commentId,
         userId,
         likeStatus: 'Like',
       })
-      await likeModel.decreaseLikesCount<PostDocument>(postId, postModel)
+      await likeModel.decreaseLikesCount<CommentDocument>(
+        commentId,
+        commentModel,
+      )
       return res.deletedCount === 1
     } catch (e) {
       console.error(e)
@@ -105,18 +111,21 @@ export class Post {
   }
 
   static async removeDislike(
-    postId: string,
+    commentId: string,
     userId: string,
-    postModel: PostModel,
+    commentModel: CommentModel,
     likeModel: LikeModelWithStatics,
   ): Promise<boolean> {
     try {
       const res = await likeModel.deleteOne({
-        postId,
+        commentId,
         userId,
         likeStatus: 'Dislike',
       })
-      await likeModel.decreaseDislikesCount<PostDocument>(postId, postModel)
+      await likeModel.decreaseDislikesCount<CommentDocument>(
+        commentId,
+        commentModel,
+      )
       return res.deletedCount === 1
     } catch (e) {
       console.error(e)
@@ -125,41 +134,41 @@ export class Post {
   }
 }
 
-export const PostSchema = SchemaFactory.createForClass(Post)
+export const CommentSchema = SchemaFactory.createForClass(Comment)
 
-PostSchema.statics = {
-  addLike: Post.addLike,
-  addDislike: Post.addDislike,
-  removeLike: Post.removeLike,
-  removeDislike: Post.removeDislike,
+CommentSchema.statics = {
+  addLike: Comment.addLike,
+  addDislike: Comment.addDislike,
+  removeLike: Comment.removeLike,
+  removeDislike: Comment.removeDislike,
 }
 
-type PostStaticMethods = {
+type CommentStaticMethods = {
   addLike(
-    postId: string,
+    commentId: string,
     like: LikeDBModel,
-    postModel: PostModel,
+    commentModel: CommentModel,
     likeModel: LikeModelWithStatics,
   ): Promise<string | null>
 
   addDislike(
-    postId: string,
+    commentId: string,
     dislike: LikeDBModel,
-    postModel: PostModel,
+    commentModel: CommentModel,
     likeModel: LikeModelWithStatics,
   ): Promise<string | null>
 
   removeLike(
-    postId: string,
+    commentId: string,
     userId: string,
-    postModel: PostModel,
+    commentModel: CommentModel,
     likeModel: LikeModelWithStatics,
   ): Promise<boolean>
 
   removeDislike(
-    postId: string,
+    commentId: string,
     userId: string,
-    postModel: PostModel,
+    commentModel: CommentModel,
     likeModel: LikeModelWithStatics,
   ): Promise<boolean>
 }

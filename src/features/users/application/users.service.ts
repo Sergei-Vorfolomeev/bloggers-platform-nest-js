@@ -3,13 +3,27 @@ import { InterLayerObject, StatusCode } from '../../../base/interlayer-object'
 import { BcryptAdapter } from '../../../base/adapters/bcrypt.adapter'
 import { UserDBModel } from '../domain/types'
 import { UsersRepository } from '../infrastructure/users.repository'
+import { JwtAdapter } from '../../../base/adapters/jwt.adapter'
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly bcryptAdapter: BcryptAdapter,
+    private readonly jwtAdapter: JwtAdapter,
   ) {}
+
+  async getUserId(accessToken: string): Promise<string | null> {
+    const payload = await this.jwtAdapter.verifyToken(accessToken, 'access')
+    if (!payload) {
+      return null
+    }
+    const user = await this.usersRepository.findUserById(payload.userId)
+    if (!user) {
+      return null
+    }
+    return payload.userId
+  }
 
   async createUser(
     login: string,

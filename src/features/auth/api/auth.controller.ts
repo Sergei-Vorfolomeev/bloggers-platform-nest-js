@@ -20,7 +20,6 @@ import { Request, Response } from 'express'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
 import { UserInputModel } from '../../users/api/models/user.input.model'
 import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guard'
-import { LoginSuccessOutputModel } from './models/auth-output.models'
 
 @Controller('auth')
 export class AuthController {
@@ -35,7 +34,7 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
     @Body() body: LoginInputModel,
-  ): Promise<LoginSuccessOutputModel> {
+  ): Promise<void> {
     const { loginOrEmail, password } = body
     const deviceName = req.headers['user-agent'] || 'unknown'
     const clientIp = req.ip || 'unknown'
@@ -50,7 +49,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
     })
-    return { accessToken: data!.accessToken }
+    res.status(200).send({ accessToken: data!.accessToken })
   }
 
   @Post('registration')

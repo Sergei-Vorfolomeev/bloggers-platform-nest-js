@@ -5,10 +5,8 @@ export type PostDBModel = {
   blogId: string
   blogName: string
   createdAt: string
-  // likesInfo: {
-  //   likesCount: number
-  //   dislikesCount: number
-  // }
+  likesInfo: {
+    likesCount: number
+    dislikesCount: number
+  }
 }
-
-export type LikeStatus = 'None' | 'Like' | 'Dislike'

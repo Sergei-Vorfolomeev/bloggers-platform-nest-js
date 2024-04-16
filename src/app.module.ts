@@ -22,6 +22,17 @@ import { AuthService } from './features/auth/application/auth.service'
 import { JwtAdapter } from './base/adapters/jwt.adapter'
 import { AuthController } from './features/auth/api/auth.controller'
 import { EmailAdapter } from './base/adapters/email.adapter'
+import {
+  Comment,
+  CommentSchema,
+} from './features/comments/domain/comment.entity'
+import { CommentsRepository } from './features/comments/infrastructure/comments.repository'
+import { CommentsService } from './features/comments/application/comments.service'
+import { LikesQueryRepository } from './features/likes/infrastructure/likes.query.repository'
+import { CommentsQueryRepository } from './features/comments/infrastructure/comments.query.repository'
+import { LikesRepository } from './features/likes/infrastructure/likes.repository'
+import { Like, LikeSchema } from './features/likes/domain/like.entity'
+import { CommentsController } from './features/comments/api/comments.controller'
 
 @Module({
   imports: [
@@ -31,12 +42,15 @@ import { EmailAdapter } from './base/adapters/email.adapter'
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
+    MongooseModule.forFeature([{ name: Like.name, schema: LikeSchema }]),
   ],
   controllers: [
     AuthController,
     BlogsController,
     PostsController,
     UsersController,
+    CommentsController,
   ],
   providers: [
     AppSettings,
@@ -44,12 +58,19 @@ import { EmailAdapter } from './base/adapters/email.adapter'
     BlogsService,
     PostsService,
     UsersService,
+    CommentsService,
+
     BlogsRepository,
     BlogsQueryRepository,
     PostsRepository,
     PostsQueryRepository,
     UsersRepository,
     UsersQueryRepository,
+    CommentsRepository,
+    CommentsQueryRepository,
+    LikesRepository,
+    LikesQueryRepository,
+
     JwtAdapter,
     BcryptAdapter,
     CryptoAdapter,
