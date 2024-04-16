@@ -1,8 +1,9 @@
-import { HydratedDocument } from 'mongoose'
+import { HydratedDocument, Model } from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { EmailConfirmationType } from './types'
 
 export type UserDocument = HydratedDocument<User>
+export type UserModel = Model<UserDocument>
 
 @Schema()
 export class User {

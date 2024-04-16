@@ -12,7 +12,6 @@ import { UsersService } from '../../users/application/users.service'
 import { DeviceOutputModel } from './models/device.output.model'
 import { Request } from 'express'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
-import { StatusCode } from '../../../base/interlayer-object'
 import { ObjectId } from 'mongodb'
 
 @Controller('security/devices')

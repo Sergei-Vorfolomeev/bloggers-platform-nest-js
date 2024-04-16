@@ -1,7 +1,8 @@
-import { HydratedDocument } from 'mongoose'
+import { HydratedDocument, Model } from 'mongoose'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 
 export type BlogDocument = HydratedDocument<Blog>
+export type BlogModel = Model<BlogDocument>
 
 @Schema()
 export class Blog {

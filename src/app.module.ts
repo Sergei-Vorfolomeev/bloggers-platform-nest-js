@@ -36,6 +36,7 @@ import { CommentsController } from './features/comments/api/comments.controller'
 import { Device, DeviceSchema } from './features/devices/domain/device.entity'
 import { DevicesRepository } from './features/devices/infrastructure/devices.repository'
 import { DevicesController } from './features/devices/api/devices.controller'
+import { TestController } from './test.controller'
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { DevicesController } from './features/devices/api/devices.controller'
     MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
   ],
   controllers: [
+    TestController,
     AuthController,
     BlogsController,
     PostsController,
