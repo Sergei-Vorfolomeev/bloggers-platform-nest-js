@@ -134,7 +134,7 @@ export class AuthController {
 
   @Post('password-recovery')
   @HttpCode(204)
-  async passwordRecovery(@Body() body: PasswordRecoveryInputModel) {
+  async recoverPassword(@Body() body: PasswordRecoveryInputModel) {
     const { email } = body
     const { statusCode, error } = await this.authService.recoverPassword(email)
     handleExceptions(statusCode, error)
@@ -142,7 +142,7 @@ export class AuthController {
 
   @Post('new-password')
   @HttpCode(204)
-  async newPassword(@Body() body: NewPasswordRecoveryInputModel) {
+  async updatePassword(@Body() body: NewPasswordRecoveryInputModel) {
     const { recoveryCode, newPassword } = body
     const { statusCode, error } = await this.authService.updatePassword(
       recoveryCode,
