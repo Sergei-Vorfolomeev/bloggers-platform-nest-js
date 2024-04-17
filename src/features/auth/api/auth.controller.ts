@@ -20,6 +20,7 @@ import { Request, Response } from 'express'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
 import { UserInputModel } from '../../users/api/models/user.input.model'
 import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guard'
+import { LoginSuccessOutputModel } from './models/auth-output.models'
 
 @Controller('auth')
 export class AuthController {
@@ -104,29 +105,59 @@ export class AuthController {
     handleExceptions(statusCode, error)
   }
 
-  // @Post()
-  // @HttpCode(200)
-  // async refreshToken(
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ): Promise<LoginSuccessOutputModel> {
-  //   const refreshToken = req.cookies.refreshToken
-  //   const { statusCode, errorsMessages, data } =
-  //     await this.authService.updateTokens(refreshToken)
-  //   handleExceptions(statusCode, errorsMessages)
-  //   res.cookie('refreshToken', data!.refreshToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //   })
-  //   return { accessToken: data!.accessToken }
-  // }
+  @Post('refresh-token')
+  @HttpCode(200)
+  async updateTokens(
+    @Req() req: Request,
+    @Res() res: Response<LoginSuccessOutputModel>,
+  ): Promise<void> {
+    const refreshToken = req.cookies.refreshToken
+    const { statusCode, error, data } =
+      await this.authService.updateTokens(refreshToken)
+    handleExceptions(statusCode, error)
+    res.cookie('refreshToken', data!.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    })
+    res.status(200).send({ accessToken: data!.accessToken })
+  }
 
-  // @Post('logout')
-  // @HttpCode(204)
-  // async logout(@Req() req: Request) {
-  //   const refreshToken = req.cookies.refreshToken
-  //   const { statusCode, errorsMessages } =
-  //     await this.authService.logout(refreshToken)
-  //   handleExceptions(statusCode, errorsMessages)
+  @Post('logout')
+  @HttpCode(204)
+  async logout(@Req() req: Request) {
+    const refreshToken = req.cookies.refreshToken
+    const { statusCode, error } = await this.authService.logout(refreshToken)
+    handleExceptions(statusCode, error)
+  }
+
+  // @Post('password-recovery')
+  // async passwordRecovery(req: RequestWithBody<PasswordRecoveryInputModel>, res: ResponseType) {
+  //   const {email} = req.body
+  //   const {statusCode} = await this.authService.recoverPassword(email)
+  //   switch (statusCode) {
+  //     case StatusCode.ServerError:
+  //       res.sendStatus(555)
+  //       break
+  //     case StatusCode.NoContent:
+  //       res.sendStatus(204)
+  //       break
+  //   }
+  // }
+  //
+  // @Post('new-password')
+  // async newPassword(req: RequestWithBody<NewPasswordRecoveryInputModel>, res: ResponseType) {
+  //   const {recoveryCode, newPassword} = req.body
+  //   const {statusCode} = await this.authService.updatePassword(recoveryCode, newPassword)
+  //   switch (statusCode) {
+  //     case StatusCode.BadRequest:
+  //       res.sendStatus(400)
+  //       break
+  //     case StatusCode.ServerError:
+  //       res.sendStatus(555)
+  //       break
+  //     case StatusCode.NoContent:
+  //       res.sendStatus(204)
+  //       break
+  //   }
   // }
 }

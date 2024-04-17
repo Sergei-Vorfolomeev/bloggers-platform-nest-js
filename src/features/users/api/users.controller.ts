@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common'
 import { UsersQueryRepository } from '../infrastructure/users.query.repository'
 import { Paginator } from '../../../base/types'
@@ -18,6 +19,7 @@ import { UserInputModel, UsersQueryParams } from './models/user.input.model'
 import { ObjectId } from 'mongodb'
 import { UsersService } from '../application/users.service'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
+import { BasicAuthGuard } from '../../../infrastructure/guards/basic-auth.guard'
 
 @Controller('users')
 export class UsersController {
@@ -66,6 +68,7 @@ export class UsersController {
   }
 
   @Post()
+  @UseGuards(BasicAuthGuard)
   async createUser(@Body() body: UserInputModel): Promise<UserOutputModel> {
     const { login, email, password } = body
     const { statusCode, data: createdUserId } =
@@ -80,8 +83,9 @@ export class UsersController {
     return createdUser
   }
 
-  @HttpCode(204)
   @Delete(':id')
+  @UseGuards(BasicAuthGuard)
+  @HttpCode(204)
   async deleteUser(@Param('id') userId: string) {
     if (!ObjectId.isValid(userId)) {
       throw new NotFoundException()

@@ -11,6 +11,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common'
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository'
@@ -24,7 +25,8 @@ import { PostOutputModel } from '../../posts/api/models/post.output.model'
 import { PostInputModel } from '../../posts/api/models/post.input.model'
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.repository'
 import { BasicAuthGuard } from '../../../infrastructure/guards/basic-auth.guard'
-import { AppSettings } from '../../../settings/app.settings'
+import { Request } from 'express'
+import { UsersService } from '../../users/application/users.service'
 
 @Controller('blogs')
 export class BlogsController {
@@ -32,6 +34,7 @@ export class BlogsController {
     private readonly blogsService: BlogsService,
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly usersService: UsersService,
   ) {}
 
   @Get()
@@ -105,16 +108,17 @@ export class BlogsController {
   async getPostsByBlogId(
     @Param('id') blogId: string,
     @Query() queryParams: QueryParams,
+    @Req() req: Request,
   ) {
     const { sortBy, sortDirection, pageNumber, pageSize } = queryParams
     if (!ObjectId.isValid(blogId)) {
       throw new NotFoundException()
     }
-    const userId = null
-    // if (req.headers.authorization) {
-    //   const token = req.headers.authorization.split(' ')[1]
-    //   userId = await this.usersService.getUserId(token)
-    // }
+    let userId = null
+    if (req.headers.authorization) {
+      const token = req.headers.authorization.split(' ')[1]
+      userId = await this.usersService.getUserId(token)
+    }
     const sortParams = {
       sortBy: sortBy ?? 'createdAt',
       sortDirection: sortDirection ?? 'desc',
@@ -137,15 +141,16 @@ export class BlogsController {
   async createPostInsideBlog(
     @Param('id') blogId: string,
     @Body() body: PostInputModel,
+    @Req() req: Request,
   ): Promise<PostOutputModel> {
     if (!ObjectId.isValid(blogId)) {
       throw new NotFoundException()
     }
-    const userId = null
-    // if (req.headers.authorization) {
-    //   const token = req.headers.authorization.split(' ')[1]
-    //   userId = await this.usersService.getUserId(token)
-    // }
+    let userId = null
+    if (req.headers.authorization) {
+      const token = req.headers.authorization.split(' ')[1]
+      userId = await this.usersService.getUserId(token)
+    }
     const { statusCode, data: createdPostId } =
       await this.blogsService.createPostInsideBlog(blogId, body)
     handleExceptions(statusCode)

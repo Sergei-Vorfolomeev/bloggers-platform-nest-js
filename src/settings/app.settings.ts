@@ -4,6 +4,13 @@ import { Injectable } from '@nestjs/common'
 
 config()
 // Сгенерируем ключ
+// const KEY = crypto.pbkdf2Sync(
+//   'prancypoodle',
+//   'sherylcrowe',
+//   10000,
+//   32,
+//   'sha512',
+// )
 const KEY = crypto.randomBytes(32) // 256 бит
 // Сгенерируем инициализирующий вектор
 const IV = crypto.randomBytes(16) // 128 бит

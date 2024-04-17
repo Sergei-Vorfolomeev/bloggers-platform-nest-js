@@ -14,6 +14,8 @@ import { UserDBModel } from '../../users/domain/types'
 import { add } from 'date-fns/add'
 import { EmailAdapter } from '../../../base/adapters/email.adapter'
 import { templateForRegistration } from '../../../base/utils/template-for-registration'
+import { DeviceDBModel } from '../../devices/domain/types'
+import { DevicesRepository } from '../../devices/infrastructure/devices.repository'
 
 @Injectable()
 export class AuthService {
@@ -22,6 +24,7 @@ export class AuthService {
     private readonly bcryptAdapter: BcryptAdapter,
     private readonly jwtAdapter: JwtAdapter,
     private readonly emailAdapter: EmailAdapter,
+    private readonly devicesRepository: DevicesRepository,
   ) {}
 
   async login(
@@ -64,19 +67,19 @@ export class AuthService {
         'Error with generating or saving tokens',
       )
     }
-    // const newDevice: DeviceDBModel = {
-    //   _id: deviceId,
-    //   userId: user._id.toString(),
-    //   ip: clientIp,
-    //   title: deviceName,
-    //   creationDate: new Date().toISOString(),
-    //   refreshToken: tokens.encryptedRefreshToken,
-    //   lastActiveDate: new Date().toISOString(),
-    //   expirationDate: add(new Date(), {
-    //     seconds: 20,
-    //   }).toISOString(),
-    // }
-    // await this.devicesRepository.addNewDevice(newDevice)
+    const newDevice: DeviceDBModel = {
+      _id: deviceId,
+      userId: user._id.toString(),
+      ip: clientIp,
+      title: deviceName,
+      creationDate: new Date().toISOString(),
+      refreshToken: tokens.encryptedRefreshToken,
+      lastActiveDate: new Date().toISOString(),
+      expirationDate: add(new Date(), {
+        seconds: 20,
+      }).toISOString(),
+    }
+    await this.devicesRepository.addNewDevice(newDevice)
     return new InterLayerObject(StatusCode.Success, null, {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
@@ -213,50 +216,52 @@ export class AuthService {
     return new InterLayerObject(StatusCode.NoContent)
   }
 
-  // async logout(refreshToken: string): Promise<InterLayerObject> {
-  //   const payload = await this.jwtAdapter.verifyRefreshToken(refreshToken)
-  //   if (!payload) {
-  //     return new InterLayerObject(StatusCode.Unauthorized)
-  //   }
-  //   const isDeleted = await this.devicesRepository.deleteDevice(payload.device._id.toString())
-  //   if (!isDeleted) {
-  //     return new InterLayerObject(StatusCode.ServerError)
-  //   }
-  //   return new InterLayerObject(StatusCode.NoContent)
-  // }
+  async logout(refreshToken: string): Promise<InterLayerObject> {
+    const payload = await this.jwtAdapter.verifyRefreshToken(refreshToken)
+    if (!payload) {
+      return new InterLayerObject(StatusCode.Unauthorized)
+    }
+    const isDeleted = await this.devicesRepository.deleteDevice(
+      payload.device._id.toString(),
+    )
+    if (!isDeleted) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    return new InterLayerObject(StatusCode.NoContent)
+  }
 
-  // async updateTokens(
-  //   refreshToken: string,
-  // ): Promise<InterLayerObject<TokensPayload>> {
-  // const payload = await this.jwtAdapter.verifyRefreshToken(refreshToken)
-  // if (!payload) {
-  //   return new InterLayerObject(StatusCode.Unauthorized)
-  // }
-  // const { user, device } = payload
-  // const tokens = await this.jwtAdapter.generateTokens(
-  //   user,
-  //   device._id.toString(),
-  // )
-  // if (!tokens) {
-  //   return new InterLayerObject(StatusCode.ServerError)
-  // }
-  // const deviceWithNewRefreshToken: DeviceDBModel = {
-  //   ...device,
-  //   refreshToken: tokens.encryptedRefreshToken,
-  //   lastActiveDate: new Date().toISOString(),
-  //   expirationDate: add(new Date(), {
-  //     seconds: 20,
-  //   }).toISOString(),
-  // }
-  // const isUpdated = await this.devicesRepository.updateRefreshToken(
-  //   deviceWithNewRefreshToken,
-  // )
-  // if (!isUpdated) {
-  //   return new Result(StatusCode.ServerError)
-  // }
-  // return new InterLayerObject(StatusCode.Success, null, {
-  //   accessToken: tokens.accessToken,
-  //   refreshToken: tokens.refreshToken,
-  // })
-  // }
+  async updateTokens(
+    refreshToken: string,
+  ): Promise<InterLayerObject<TokensPayload>> {
+    const payload = await this.jwtAdapter.verifyRefreshToken(refreshToken)
+    if (!payload) {
+      return new InterLayerObject(StatusCode.Unauthorized)
+    }
+    const { user, device } = payload
+    const tokens = await this.jwtAdapter.generateTokens(
+      user,
+      device._id.toString(),
+    )
+    if (!tokens) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    const deviceWithNewRefreshToken: DeviceDBModel = {
+      ...device,
+      refreshToken: tokens.encryptedRefreshToken,
+      lastActiveDate: new Date().toISOString(),
+      expirationDate: add(new Date(), {
+        seconds: 20,
+      }).toISOString(),
+    }
+    const isUpdated = await this.devicesRepository.updateRefreshToken(
+      deviceWithNewRefreshToken,
+    )
+    if (!isUpdated) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    return new InterLayerObject(StatusCode.Success, null, {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    })
+  }
 }
