@@ -21,3 +21,20 @@ export class RegistrationEmailResendingModel {
   @IsNotEmpty()
   email: string
 }
+
+export class PasswordRecoveryInputModel {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  email: string
+}
+
+export class NewPasswordRecoveryInputModel {
+  @IsString()
+  @IsNotEmpty()
+  newPassword: string
+
+  @IsString()
+  @IsNotEmpty()
+  recoveryCode: string
+}

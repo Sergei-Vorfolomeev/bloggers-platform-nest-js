@@ -13,6 +13,8 @@ import { UsersQueryRepository } from '../../users/infrastructure/users.query.rep
 import { AuthService } from '../application/auth.service'
 import {
   LoginInputModel,
+  NewPasswordRecoveryInputModel,
+  PasswordRecoveryInputModel,
   RegistrationConfirmationCodeModel,
   RegistrationEmailResendingModel,
 } from './models/auth-input.models'
@@ -39,13 +41,13 @@ export class AuthController {
     const { loginOrEmail, password } = body
     const deviceName = req.headers['user-agent'] || 'unknown'
     const clientIp = req.ip || 'unknown'
-    const { statusCode, data } = await this.authService.login(
+    const { statusCode, error, data } = await this.authService.login(
       loginOrEmail,
       password,
       deviceName.toString(),
       clientIp,
     )
-    handleExceptions(statusCode)
+    handleExceptions(statusCode, error)
     res.cookie('refreshToken', data!.refreshToken, {
       httpOnly: true,
       secure: true,
@@ -130,34 +132,22 @@ export class AuthController {
     handleExceptions(statusCode, error)
   }
 
-  // @Post('password-recovery')
-  // async passwordRecovery(req: RequestWithBody<PasswordRecoveryInputModel>, res: ResponseType) {
-  //   const {email} = req.body
-  //   const {statusCode} = await this.authService.recoverPassword(email)
-  //   switch (statusCode) {
-  //     case StatusCode.ServerError:
-  //       res.sendStatus(555)
-  //       break
-  //     case StatusCode.NoContent:
-  //       res.sendStatus(204)
-  //       break
-  //   }
-  // }
-  //
-  // @Post('new-password')
-  // async newPassword(req: RequestWithBody<NewPasswordRecoveryInputModel>, res: ResponseType) {
-  //   const {recoveryCode, newPassword} = req.body
-  //   const {statusCode} = await this.authService.updatePassword(recoveryCode, newPassword)
-  //   switch (statusCode) {
-  //     case StatusCode.BadRequest:
-  //       res.sendStatus(400)
-  //       break
-  //     case StatusCode.ServerError:
-  //       res.sendStatus(555)
-  //       break
-  //     case StatusCode.NoContent:
-  //       res.sendStatus(204)
-  //       break
-  //   }
-  // }
+  @Post('password-recovery')
+  @HttpCode(204)
+  async passwordRecovery(@Body() body: PasswordRecoveryInputModel) {
+    const { email } = body
+    const { statusCode, error } = await this.authService.recoverPassword(email)
+    handleExceptions(statusCode, error)
+  }
+
+  @Post('new-password')
+  @HttpCode(204)
+  async newPassword(@Body() body: NewPasswordRecoveryInputModel) {
+    const { recoveryCode, newPassword } = body
+    const { statusCode, error } = await this.authService.updatePassword(
+      recoveryCode,
+      newPassword,
+    )
+    handleExceptions(statusCode, error)
+  }
 }

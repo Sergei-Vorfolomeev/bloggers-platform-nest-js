@@ -16,6 +16,7 @@ import { EmailAdapter } from '../../../base/adapters/email.adapter'
 import { templateForRegistration } from '../../../base/utils/template-for-registration'
 import { DeviceDBModel } from '../../devices/domain/types'
 import { DevicesRepository } from '../../devices/infrastructure/devices.repository'
+import { templateForPasswordRecovery } from '../../../base/utils/template-for-password-recovery'
 
 @Injectable()
 export class AuthService {
@@ -95,14 +96,14 @@ export class AuthService {
     if (userByLogin) {
       return new InterLayerObject(
         StatusCode.BadRequest,
-        'User with provided login already exists',
+        new FieldError('login', 'User with provided login already exists'),
       )
     }
     const userByEmail = await this.usersRepository.findUserByLoginOrEmail(email)
     if (userByEmail) {
       return new InterLayerObject(
         StatusCode.BadRequest,
-        'User with provided email already exists',
+        new FieldError('email', 'User with provided email already exists'),
       )
     }
     const hashedPassword = await this.bcryptAdapter.generateHash(password)
@@ -263,5 +264,51 @@ export class AuthService {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     })
+  }
+
+  async recoverPassword(email: string): Promise<InterLayerObject> {
+    const user = await this.usersRepository.findUserByLoginOrEmail(email)
+    if (!user) {
+      return new InterLayerObject(StatusCode.NoContent)
+    }
+    const recoveryCode = randomUUID()
+    const isAdded = await this.usersRepository.addRecoveryCode(
+      user._id,
+      recoveryCode,
+    )
+    if (!isAdded) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    const isSent = await this.emailAdapter.sendEmail(
+      email,
+      'Password recovery',
+      templateForPasswordRecovery(recoveryCode),
+    )
+    if (!isSent) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    return new InterLayerObject(StatusCode.NoContent)
+  }
+
+  async updatePassword(
+    recoveryCode: string,
+    newPassword: string,
+  ): Promise<InterLayerObject> {
+    const user = await this.usersRepository.findUserByRecoveryCode(recoveryCode)
+    if (!user) {
+      return new InterLayerObject(StatusCode.BadRequest)
+    }
+    const hashedPassword = await this.bcryptAdapter.generateHash(newPassword)
+    if (!hashedPassword) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    const isUpdated = await this.usersRepository.updatePassword(
+      user._id,
+      hashedPassword,
+    )
+    if (!isUpdated) {
+      return new InterLayerObject(StatusCode.ServerError)
+    }
+    return new InterLayerObject(StatusCode.NoContent)
   }
 }

@@ -98,4 +98,48 @@ export class UsersRepository {
       return false
     }
   }
+
+  async addRecoveryCode(
+    userId: ObjectId,
+    recoveryCode: string,
+  ): Promise<boolean> {
+    try {
+      const res = await this.userModel.updateOne(
+        { _id: userId },
+        { 'passwordRecovery.recoveryCode': recoveryCode },
+      )
+      return res.matchedCount === 1
+    } catch (e) {
+      console.error(e)
+      return false
+    }
+  }
+
+  async findUserByRecoveryCode(
+    recoveryCode: string,
+  ): Promise<WithId<UserDBModel> | null> {
+    try {
+      return this.userModel
+        .findOne()
+        .where('passwordRecovery.recoveryCode')
+        .equals(recoveryCode)
+        .exec()
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  }
+
+  async updatePassword(userId: ObjectId, hashedPassword: string) {
+    try {
+      const res = await this.userModel.updateOne(
+        { _id: userId },
+        { password: hashedPassword },
+      )
+      return res.matchedCount === 1
+    } catch (e) {
+      console.error(e)
+      return false
+    }
+  }
 }
