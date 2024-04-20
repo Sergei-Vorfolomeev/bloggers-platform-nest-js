@@ -1,24 +1,23 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator'
+import { MaxLength } from 'class-validator'
+import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
+import { BlogIsExist } from '../../../../base/decorators/blog-is-exist.decorator'
 
 export class PostInputModel {
   @MaxLength(30)
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   title: string
 
   @MaxLength(100)
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   shortDescription: string
 
   @MaxLength(1000)
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   content: string
 }
 
 export class PostInputModelWithBlogId extends PostInputModel {
-  @IsString()
-  @IsNotEmpty()
+  @BlogIsExist()
+  @isValidString()
   blogId: string
 }

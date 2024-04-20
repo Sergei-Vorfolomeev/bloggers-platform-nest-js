@@ -1,8 +1,8 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator'
+import { Length } from 'class-validator'
+import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
 
 export class CommentInputModel {
   @Length(20, 300)
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   content: string
 }

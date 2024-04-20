@@ -1,5 +1,6 @@
 import { QueryParams } from '../../../../base/types'
-import { IsNotEmpty, IsString, IsUrl, MaxLength } from 'class-validator'
+import { IsUrl, MaxLength } from 'class-validator'
+import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
 
 export type BlogsQueryParams = {
   searchNameTerm?: string
@@ -7,18 +8,15 @@ export type BlogsQueryParams = {
 
 export class BlogInputModel {
   @MaxLength(15)
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   name: string
 
   @MaxLength(500)
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   description: string
 
   @MaxLength(100)
   @IsUrl()
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   websiteUrl: string
 }

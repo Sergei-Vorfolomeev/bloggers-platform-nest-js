@@ -37,18 +37,21 @@ import { Device, DeviceSchema } from './features/devices/domain/device.entity'
 import { DevicesRepository } from './features/devices/infrastructure/devices.repository'
 import { DevicesController } from './features/devices/api/devices.controller'
 import { TestController } from './test.controller'
+import { BlogIsExistConstraint } from './base/decorators/blog-is-exist.decorator'
 
 @Module({
   imports: [
     MongooseModule.forRoot(AppSettings.MONGO_URI, {
       dbName: 'bloggers-platform',
     }),
-    MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
-    MongooseModule.forFeature([{ name: Like.name, schema: LikeSchema }]),
-    MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
+    MongooseModule.forFeature([
+      { name: Blog.name, schema: BlogSchema },
+      { name: Post.name, schema: PostSchema },
+      { name: User.name, schema: UserSchema },
+      { name: Comment.name, schema: CommentSchema },
+      { name: Like.name, schema: LikeSchema },
+      { name: Device.name, schema: DeviceSchema },
+    ]),
   ],
   controllers: [
     TestController,
@@ -59,7 +62,9 @@ import { TestController } from './test.controller'
     CommentsController,
     DevicesController,
   ],
+  // Регистрация провайдеров
   providers: [
+    BlogIsExistConstraint,
     AppSettings,
     AuthService,
     BlogsService,
@@ -83,6 +88,25 @@ import { TestController } from './test.controller'
     BcryptAdapter,
     CryptoAdapter,
     EmailAdapter,
+
+    // альтернативные способы регистрации провайдера
+    /* {
+           provide: UsersService,
+           useClass: UsersService,
+       },*/
+    /*{
+            provide: UsersService,
+            useValue: {method: () => {}},
+
+        },*/
+    // Регистрация с помощью useFactory (необходимы зависимости из ioc, подбор провайдера, ...)
+    /* {
+            provide: UsersService,
+            useFactory: (repo: UsersRepository) => {
+                return new UsersService(repo);
+            },
+            inject: [UsersRepository]
+        }*/
   ],
 })
 export class AppModule {}

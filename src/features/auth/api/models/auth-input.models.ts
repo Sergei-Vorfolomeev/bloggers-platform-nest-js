@@ -1,40 +1,36 @@
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator'
+import { IsEmail, Length } from 'class-validator'
+import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
 
 export class LoginInputModel {
   @Length(3, 30)
-  @IsNotEmpty()
+  @isValidString()
   loginOrEmail: string
 
-  @IsNotEmpty()
+  @isValidString()
   password: string
 }
 
 export class RegistrationConfirmationCodeModel {
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   code: string
 }
 
 export class RegistrationEmailResendingModel {
   @IsEmail()
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   email: string
 }
 
 export class PasswordRecoveryInputModel {
   @IsEmail()
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   email: string
 }
 
 export class NewPasswordRecoveryInputModel {
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   newPassword: string
 
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   recoveryCode: string
 }

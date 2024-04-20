@@ -1,5 +1,6 @@
 import { QueryParams } from '../../../../base/types'
-import { IsEmail, IsNotEmpty, IsString, Length, Matches } from 'class-validator'
+import { IsEmail, Length, Matches } from 'class-validator'
+import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
 
 export type UsersQueryParams = {
   searchLoginTerm?: string
@@ -9,17 +10,14 @@ export type UsersQueryParams = {
 export class UserInputModel {
   @Matches(/^[a-zA-Z0-9_-]*$/)
   @Length(3, 10)
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   login: string
 
   @IsEmail()
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   email: string
 
   @Length(6, 20)
-  @IsString()
-  @IsNotEmpty()
+  @isValidString()
   password: string
 }

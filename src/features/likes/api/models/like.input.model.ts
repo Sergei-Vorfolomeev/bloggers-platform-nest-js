@@ -1,8 +1,9 @@
 import { LikeStatus } from '../../domain/types'
-import { IsIn, IsNotEmpty } from 'class-validator'
+import { IsIn } from 'class-validator'
+import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
 
 export class LikeInputModel {
   @IsIn(['Like', 'Dislike', 'None'])
-  @IsNotEmpty()
+  @isValidString()
   likeStatus: LikeStatus
 }
