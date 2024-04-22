@@ -20,9 +20,14 @@ import {
 } from './models/auth-input.models'
 import { Request, Response } from 'express'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
-import { UserInputModel } from '../../users/api/models/user.input.model'
+import {
+  UserAttachedInRequest,
+  UserInputModel,
+} from '../../users/api/models/user.input.model'
 import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guard'
 import { LoginSuccessOutputModel } from './models/auth-output.models'
+import { RefreshToken } from '../../../base/decorators/refresh-token.decorator'
+import { User } from '../../../base/decorators/user.decorator'
 
 @Controller('auth')
 export class AuthController {
@@ -69,11 +74,10 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(BearerAuthGuard)
-  async me(@Req() req: Request) {
-    if (!req.user) {
+  async me(@User() { id: userId }: UserAttachedInRequest) {
+    if (userId) {
       throw new UnauthorizedException()
     }
-    const { id: userId } = req.user
     const user = await this.usersQueryRepository.getUserById(userId)
     if (!user) {
       throw new UnauthorizedException()
@@ -110,10 +114,9 @@ export class AuthController {
   @Post('refresh-token')
   @HttpCode(200)
   async updateTokens(
-    @Req() req: Request,
+    @RefreshToken() refreshToken: string,
     @Res() res: Response<LoginSuccessOutputModel>,
   ): Promise<void> {
-    const refreshToken = req.cookies.refreshToken
     const { statusCode, error, data } =
       await this.authService.updateTokens(refreshToken)
     handleExceptions(statusCode, error)
@@ -126,8 +129,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(204)
-  async logout(@Req() req: Request) {
-    const refreshToken = req.cookies.refreshToken
+  async logout(@RefreshToken() refreshToken: string) {
     const { statusCode, error } = await this.authService.logout(refreshToken)
     handleExceptions(statusCode, error)
   }

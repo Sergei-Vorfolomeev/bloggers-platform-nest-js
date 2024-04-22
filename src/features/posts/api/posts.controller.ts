@@ -11,7 +11,6 @@ import {
   Post,
   Put,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common'
 import { Paginator, QueryParams } from '../../../base/types'
@@ -22,7 +21,6 @@ import { PostInputModelWithBlogId } from './models/post.input.model'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
 import { PostsService } from '../application/posts.service'
 import { BasicAuthGuard } from '../../../infrastructure/guards/basic-auth.guard'
-import { Request } from 'express'
 import { UsersService } from '../../users/application/users.service'
 import { CommentInputModel } from '../../comments/api/models/comment.input.model'
 import { CommentOutputModel } from '../../comments/api/models/comment.output.model'
@@ -30,6 +28,9 @@ import { CommentsService } from '../../comments/application/comments.service'
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query.repository'
 import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guard'
 import { LikeInputModel } from '../../likes/api/models/like.input.model'
+import { AccessToken } from '../../../base/decorators/access-token.decorator'
+import { User } from '../../../base/decorators/user.decorator'
+import { UserAttachedInRequest } from '../../users/api/models/user.input.model'
 
 @Controller('posts')
 export class PostsController {
@@ -44,12 +45,11 @@ export class PostsController {
   @Get()
   async getPosts(
     @Query() query: QueryParams,
-    @Req() req: Request,
+    @AccessToken() token: string | null,
   ): Promise<Paginator<PostOutputModel[]>> {
     const { sortBy, sortDirection, pageNumber, pageSize } = query
     let userId = null
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1]
+    if (token) {
       userId = await this.usersService.getUserId(token)
     }
     const sortParams = {
@@ -68,14 +68,13 @@ export class PostsController {
   @Get(':id')
   async getPostById(
     @Param('id') postId: string,
-    @Req() req: Request,
+    @AccessToken() token: string | null,
   ): Promise<PostOutputModel> {
     if (!ObjectId.isValid(postId)) {
       throw new NotFoundException()
     }
     let userId = null
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1]
+    if (token) {
       userId = await this.usersService.getUserId(token)
     }
     const post = await this.postsQueryRepository.getPostById(postId, userId)
@@ -89,13 +88,12 @@ export class PostsController {
   @UseGuards(BasicAuthGuard)
   async createPost(
     @Body() body: PostInputModelWithBlogId,
-    @Req() req: Request,
+    @AccessToken() token: string | null,
   ): Promise<PostOutputModel> {
     const { statusCode, data: createdPostId } =
       await this.postsService.createPost(body)
     let userId = null
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1]
+    if (token) {
       userId = await this.usersService.getUserId(token)
     }
     handleExceptions(statusCode)
@@ -140,10 +138,9 @@ export class PostsController {
   async updateLikeStatus(
     @Param('id') postId: string,
     @Body() body: LikeInputModel,
-    @Req() req: Request,
+    @User() { id: userId }: UserAttachedInRequest,
   ) {
     const { likeStatus } = body
-    const { id: userId } = req.user
     if (!ObjectId.isValid(postId)) {
       throw new NotFoundException()
     }
@@ -159,7 +156,7 @@ export class PostsController {
   async getCommentsByPostId(
     @Param('id') postId: string,
     @Query() query: QueryParams,
-    @Req() req: Request,
+    @AccessToken() token: string | null,
   ): Promise<Paginator<CommentOutputModel[]>> {
     const { sortBy, sortDirection, pageNumber, pageSize } = query
     if (!ObjectId.isValid(postId)) {
@@ -172,8 +169,7 @@ export class PostsController {
       pageSize: pageSize ? +pageSize : 10,
     }
     let userId = null
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1]
+    if (token) {
       userId = await this.usersService.getUserId(token)
     }
     const comments = await this.commentsQueryRepository.getCommentsByPostId(
@@ -192,10 +188,9 @@ export class PostsController {
   async createComment(
     @Param('id') postId: string,
     @Body() body: CommentInputModel,
-    @Req() req: Request,
+    @User() { id: userId }: UserAttachedInRequest,
   ): Promise<CommentOutputModel> {
     const { content } = body
-    const { id: userId } = req.user
     if (!ObjectId.isValid(postId)) {
       throw new NotFoundException()
     }

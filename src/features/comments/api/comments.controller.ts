@@ -20,6 +20,9 @@ import { handleExceptions } from '../../../base/utils/handle-exceptions'
 import { CommentInputModel } from './models/comment.input.model'
 import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guard'
 import { LikeInputModel } from '../../likes/api/models/like.input.model'
+import { AccessToken } from '../../../base/decorators/access-token.decorator'
+import { UserAttachedInRequest } from '../../users/api/models/user.input.model'
+import { User } from '../../../base/decorators/user.decorator'
 
 @Controller('comments')
 export class CommentsController {
@@ -32,14 +35,13 @@ export class CommentsController {
   @Get(':id')
   async getCommentById(
     @Param('id') commentId: string,
-    @Req() req: Request,
+    @AccessToken() token: string | null,
   ): Promise<CommentOutputModel> {
     if (!ObjectId.isValid(commentId)) {
       throw new NotFoundException()
     }
     let userId = null
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1]
+    if (token) {
       userId = await this.usersService.getUserId(token)
     }
     const comment = await this.commentsQueryRepository.getCommentById(
@@ -55,8 +57,10 @@ export class CommentsController {
   @Delete(':id')
   @HttpCode(204)
   @UseGuards(BearerAuthGuard)
-  async deleteComment(@Param('id') commentId: string, @Req() req: Request) {
-    const { id: userId } = req.user
+  async deleteComment(
+    @Param('id') commentId: string,
+    @User() { id: userId }: UserAttachedInRequest,
+  ) {
     if (!ObjectId.isValid(commentId)) {
       throw new NotFoundException()
     }
@@ -72,11 +76,10 @@ export class CommentsController {
   @UseGuards(BearerAuthGuard)
   async updateComment(
     @Param('id') commentId: string,
-    @Req() req: Request,
+    @User() { id: userId }: UserAttachedInRequest,
     @Body() body: CommentInputModel,
   ) {
     const { content } = body
-    const { id: userId } = req.user
     if (!ObjectId.isValid(commentId)) {
       throw new NotFoundException()
     }
@@ -93,11 +96,10 @@ export class CommentsController {
   @UseGuards(BearerAuthGuard)
   async updateLikeStatus(
     @Param('id') commentId: string,
-    @Req() req: Request,
+    @User() { id: userId }: UserAttachedInRequest,
     @Body() body: LikeInputModel,
   ) {
     const { likeStatus } = body
-    const { id: userId } = req.user
     if (!ObjectId.isValid(commentId)) {
       throw new NotFoundException()
     }

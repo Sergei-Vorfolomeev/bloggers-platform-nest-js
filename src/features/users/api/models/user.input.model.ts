@@ -21,3 +21,7 @@ export class UserInputModel {
   @isValidString()
   password: string
 }
+
+export type UserAttachedInRequest = {
+  id: string
+}
