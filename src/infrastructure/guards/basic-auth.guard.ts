@@ -4,11 +4,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
-import { AppSettings } from '../../settings/app.settings'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class BasicAuthGuard implements CanActivate {
-  constructor(private readonly appSettings: AppSettings) {}
+  constructor(private readonly configService: ConfigService) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest()
@@ -24,8 +24,8 @@ export class BasicAuthGuard implements CanActivate {
     const [login, password] = decodedToken.split(':')
 
     if (
-      login === this.appSettings.ADMIN_LOGIN &&
-      password === this.appSettings.ADMIN_PASSWORD
+      login === this.configService.get<string>('basicAuth.ADMIN_LOGIN') &&
+      password === this.configService.get<string>('basicAuth.ADMIN_PASSWORD')
     ) {
       return true
     }

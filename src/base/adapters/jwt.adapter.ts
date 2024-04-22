@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common'
 import { WithId } from 'mongodb'
 import { UserDBModel } from '../../features/users/domain/types'
 import jwt, { JwtPayload } from 'jsonwebtoken'
-import { AppSettings } from '../../settings/app.settings'
 import { TokensPayload } from '../../features/auth/application/types'
 import { CryptoAdapter } from './crypto.adapter'
 import { UsersRepository } from '../../features/users/infrastructure/users.repository'
 import { DevicesRepository } from '../../features/devices/infrastructure/devices.repository'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class JwtAdapter {
   constructor(
-    protected readonly appSettings: AppSettings,
+    protected readonly configService: ConfigService,
     protected readonly cryptoAdapter: CryptoAdapter,
     protected readonly usersRepository: UsersRepository,
     protected readonly devicesRepository: DevicesRepository,
@@ -22,15 +22,18 @@ export class JwtAdapter {
     deviceId: string,
     type: 'access' | 'refresh',
   ) {
+    const secretKey =
+      type === 'access'
+        ? this.configService.get<string>('jwtAdapter.SECRET_KEY_1', '')
+        : this.configService.get<string>('jwtAdapter.SECRET_KEY_2', '')
+
     return jwt.sign(
       {
         userId: user._id.toString(),
         deviceId,
       },
-      type === 'access'
-        ? this.appSettings.SECRET_KEY_1
-        : this.appSettings.SECRET_KEY_2,
-      { expiresIn: type === 'access' ? '10s' : '20s' },
+      secretKey,
+      { expiresIn: type === 'access' ? '1000s' : '2000s' },
     )
   }
 
@@ -41,8 +44,8 @@ export class JwtAdapter {
     try {
       const secretKey =
         type === 'access'
-          ? this.appSettings.SECRET_KEY_1
-          : this.appSettings.SECRET_KEY_2
+          ? this.configService.get<string>('jwtAdapter.SECRET_KEY_1', '')
+          : this.configService.get<string>('jwtAdapter.SECRET_KEY_2', '')
       return jwt.verify(token, secretKey) as JwtPayload
     } catch (error) {
       console.error('Token verification has the following error: ' + error)

@@ -16,7 +16,6 @@ import { User, UserSchema } from './features/users/domain/user.entity'
 import { UsersController } from './features/users/api/users.controller'
 import { UsersService } from './features/users/application/users.service'
 import { BcryptAdapter } from './base/adapters/bcrypt.adapter'
-import { AppSettings } from './settings/app.settings'
 import { CryptoAdapter } from './base/adapters/crypto.adapter'
 import { AuthService } from './features/auth/application/auth.service'
 import { JwtAdapter } from './base/adapters/jwt.adapter'
@@ -43,11 +42,21 @@ import {
   ConnectionSchema,
 } from './features/connections/domain/connection.entity'
 import { RateLimiter } from './infrastructure/middlewares/rate-limiter.middleware'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import configuration from './settings/configuration'
 
 @Module({
   imports: [
-    MongooseModule.forRoot(AppSettings.MONGO_URI, {
-      dbName: 'bloggers-platform',
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => ({
+        dbName: 'bloggers-platform',
+        uri: configService.get<string>('db.MONGO_URI'),
+      }),
+      inject: [ConfigService],
     }),
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
@@ -71,7 +80,6 @@ import { RateLimiter } from './infrastructure/middlewares/rate-limiter.middlewar
   // Регистрация провайдеров
   providers: [
     BlogIsExistConstraint,
-    AppSettings,
     AuthService,
     BlogsService,
     PostsService,
