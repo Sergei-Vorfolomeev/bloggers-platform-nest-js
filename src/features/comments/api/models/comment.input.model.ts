@@ -1,5 +1,5 @@
 import { Length } from 'class-validator'
-import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
+import { isValidString } from '../../../../infrastructure/decorators/is-valid-string.decorator'
 
 export class CommentInputModel {
   @Length(20, 300)

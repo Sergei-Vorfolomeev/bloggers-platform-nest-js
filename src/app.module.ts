@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { BlogsController } from './features/blogs/api/blogs.controller'
 import { BlogsService } from './features/blogs/application/blogs.service'
 import { BlogsRepository } from './features/blogs/infrastructure/blogs.repository'
@@ -37,7 +37,12 @@ import { Device, DeviceSchema } from './features/devices/domain/device.entity'
 import { DevicesRepository } from './features/devices/infrastructure/devices.repository'
 import { DevicesController } from './features/devices/api/devices.controller'
 import { TestController } from './test.controller'
-import { BlogIsExistConstraint } from './base/decorators/blog-is-exist.decorator'
+import { BlogIsExistConstraint } from './infrastructure/decorators/blog-is-exist.decorator'
+import {
+  Connection,
+  ConnectionSchema,
+} from './features/connections/domain/connection.entity'
+import { RateLimiter } from './infrastructure/middlewares/rate-limiter.middleware'
 
 @Module({
   imports: [
@@ -51,6 +56,7 @@ import { BlogIsExistConstraint } from './base/decorators/blog-is-exist.decorator
       { name: Comment.name, schema: CommentSchema },
       { name: Like.name, schema: LikeSchema },
       { name: Device.name, schema: DeviceSchema },
+      { name: Connection.name, schema: ConnectionSchema },
     ]),
   ],
   controllers: [
@@ -109,4 +115,8 @@ import { BlogIsExistConstraint } from './base/decorators/blog-is-exist.decorator
         }*/
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  async configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RateLimiter).forRoutes(AuthController)
+  }
+}

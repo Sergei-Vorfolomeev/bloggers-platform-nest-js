@@ -26,8 +26,8 @@ import {
 } from '../../users/api/models/user.input.model'
 import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guard'
 import { LoginSuccessOutputModel } from './models/auth-output.models'
-import { RefreshToken } from '../../../base/decorators/refresh-token.decorator'
-import { User } from '../../../base/decorators/user.decorator'
+import { RefreshToken } from '../../../infrastructure/decorators/refresh-token.decorator'
+import { User } from '../../../infrastructure/decorators/user.decorator'
 
 @Controller('auth')
 export class AuthController {
@@ -75,7 +75,7 @@ export class AuthController {
   @Get('me')
   @UseGuards(BearerAuthGuard)
   async me(@User() { id: userId }: UserAttachedInRequest) {
-    if (userId) {
+    if (!userId) {
       throw new UnauthorizedException()
     }
     const user = await this.usersQueryRepository.getUserById(userId)

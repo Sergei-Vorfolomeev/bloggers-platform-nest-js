@@ -1,5 +1,5 @@
 import { IsEmail, Length } from 'class-validator'
-import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
+import { isValidString } from '../../../../infrastructure/decorators/is-valid-string.decorator'
 
 export class LoginInputModel {
   @Length(3, 30)

@@ -1,6 +1,6 @@
 import { QueryParams } from '../../../../base/types'
 import { IsEmail, Length, Matches } from 'class-validator'
-import { isValidString } from '../../../../base/decorators/is-valid-string.decorator'
+import { isValidString } from '../../../../infrastructure/decorators/is-valid-string.decorator'
 
 export type UsersQueryParams = {
   searchLoginTerm?: string

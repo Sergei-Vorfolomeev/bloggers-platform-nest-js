@@ -30,7 +30,7 @@ export class JwtAdapter {
       type === 'access'
         ? this.appSettings.SECRET_KEY_1
         : this.appSettings.SECRET_KEY_2,
-      { expiresIn: type === 'access' ? '3000s' : '6000s' },
+      { expiresIn: type === 'access' ? '10s' : '20s' },
     )
   }
 

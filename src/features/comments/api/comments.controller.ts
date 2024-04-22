@@ -20,9 +20,9 @@ import { handleExceptions } from '../../../base/utils/handle-exceptions'
 import { CommentInputModel } from './models/comment.input.model'
 import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guard'
 import { LikeInputModel } from '../../likes/api/models/like.input.model'
-import { AccessToken } from '../../../base/decorators/access-token.decorator'
+import { AccessToken } from '../../../infrastructure/decorators/access-token.decorator'
 import { UserAttachedInRequest } from '../../users/api/models/user.input.model'
-import { User } from '../../../base/decorators/user.decorator'
+import { User } from '../../../infrastructure/decorators/user.decorator'
 
 @Controller('comments')
 export class CommentsController {
