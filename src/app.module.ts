@@ -49,6 +49,7 @@ import configuration from './settings/configuration'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
       load: [configuration],
     }),
     MongooseModule.forRootAsync({

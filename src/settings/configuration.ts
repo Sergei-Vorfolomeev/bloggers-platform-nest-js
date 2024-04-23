@@ -17,10 +17,7 @@ export default () => ({
   env: process.env.NODE_ENV,
   port: 3000,
   db: {
-    MONGO_URI:
-      process.env.NODE_ENV === 'development'
-        ? process.env.MONGO_URL
-        : 'https://bloggers-platform.com',
+    MONGO_URI: process.env.MONGO_URL,
   },
   basicAuth: {
     ADMIN_LOGIN: 'admin',
