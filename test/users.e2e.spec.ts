@@ -10,10 +10,10 @@ describe('UsersController (e2e)', () => {
   let app: INestApplication
   let mongoServer: MongoMemoryServer
   let httpServer: any
+  const userTestHelper = new UserTestHelper()
   const credentials = Buffer.from(
     `${process.env.BASIC_LOGIN}:${process.env.BASIC_PASSWORD}`,
   ).toString('base64')
-  const usersTestHelper = new UserTestHelper(credentials)
 
   beforeAll(async () => {
     const res = await initTestSettings()
@@ -107,7 +107,7 @@ describe('UsersController (e2e)', () => {
 
   let users: any[] = []
   it('create many users', async () => {
-    users = await usersTestHelper.createManyUsers(httpServer, 15)
+    users = await userTestHelper.createManyUsers(httpServer, 15, credentials)
   })
 
   it('get all users', async () => {

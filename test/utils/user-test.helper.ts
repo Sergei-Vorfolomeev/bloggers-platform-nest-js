@@ -2,16 +2,10 @@ import request from 'supertest'
 import { PATHS } from '../../src/base/const/paths'
 
 export class UserTestHelper {
-  private readonly credentials: string
-
-  constructor(credentials: string) {
-    this.credentials = credentials
-  }
-
-  async createUser(httpServer: any) {
+  async createUser(httpServer: any, credentials: string) {
     const res = await request(httpServer)
       .post(PATHS.users)
-      .set('Authorization', `Basic ${this.credentials}`)
+      .set('Authorization', `Basic ${credentials}`)
       .send({
         login: 'test-login',
         email: 'test@gmail.com',
@@ -21,13 +15,13 @@ export class UserTestHelper {
     return res.body
   }
 
-  async createManyUsers(httpServer: any, count: number) {
+  async createManyUsers(httpServer: any, count: number, credentials: string) {
     const users = []
     for (let i = 0; i < count; i++) {
       try {
         const res = await request(httpServer)
           .post(PATHS.users)
-          .set('Authorization', `Basic ${this.credentials}`)
+          .set('Authorization', `Basic ${credentials}`)
           .send({
             login: `test-${i}`,
             email: `test-${i}-@gmail.com`,
@@ -40,5 +34,22 @@ export class UserTestHelper {
       }
     }
     return users.reverse()
+  }
+
+  async registerUser(httpServer: any) {
+    const i = Math.ceil(Math.random() * 1000)
+    await request(httpServer)
+      .post(`${PATHS.auth}/registration`)
+      .send({
+        login: `login-${i}`,
+        email: `email${i}@gmail.com`,
+        password: 'test-pass',
+      })
+      .expect(204)
+    return {
+      login: `login-${i}`,
+      email: `email${i}@gmail.com`,
+      password: 'test-pass',
+    }
   }
 }
