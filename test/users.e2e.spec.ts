@@ -4,25 +4,21 @@ import { PATHS } from '../src/base/const/paths'
 import { initTestSettings } from './utils/init-test.settings'
 import { INestApplication } from '@nestjs/common'
 import process from 'process'
-import { UsersTestHelper } from './utils/users-test.helper'
-import { ConfigService } from '@nestjs/config'
+import { UserTestHelper } from './utils/user-test.helper'
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication
   let mongoServer: MongoMemoryServer
   let httpServer: any
-  let usersTestHelper: UsersTestHelper
-
   const credentials = Buffer.from(
     `${process.env.BASIC_LOGIN}:${process.env.BASIC_PASSWORD}`,
   ).toString('base64')
+  const usersTestHelper = new UserTestHelper(credentials)
 
   beforeAll(async () => {
     const res = await initTestSettings()
     app = res.app
     httpServer = res.httpServer
-    const configService = app.get(ConfigService)
-    usersTestHelper = new UsersTestHelper(configService)
   })
 
   afterAll(async () => {

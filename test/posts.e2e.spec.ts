@@ -1,47 +1,33 @@
-import { NestApplication } from '@nestjs/core'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import process from 'process'
-import { Test } from '@nestjs/testing'
-import { AppModule } from '../src/app.module'
-import { applyAppSettings } from '../src/settings/apply-app-settings'
-import { ConfigService } from '@nestjs/config'
 import request from 'supertest'
 import { PATHS } from '../src/base/const/paths'
 import { ObjectId } from 'mongodb'
+import { initTestSettings } from './utils/init-test.settings'
+import { INestApplication } from '@nestjs/common'
 
 describe('PostsController (e2e)', () => {
-  let app: NestApplication
+  let app: INestApplication
   let mongoServer: MongoMemoryServer
+  let httpServer: any
   const credentials = Buffer.from(
     `${process.env.BASIC_LOGIN}:${process.env.BASIC_PASSWORD}`,
   ).toString('base64')
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create()
-    process.env.MONGO_URL = mongoServer.getUri()
-
-    const moduleFixture = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
-
-    app = moduleFixture.createNestApplication()
-    applyAppSettings(app)
-    await app.init()
-    const configService = app.get(ConfigService)
-    const env = configService.get<string>('env')
-    console.log(`Environment: ${env}`)
-
-    await request(app.getHttpServer()).delete(PATHS.__test__).expect(204)
+    const res = await initTestSettings()
+    app = res.app
+    httpServer = res.httpServer
   })
 
   afterAll(async () => {
-    await request(app.getHttpServer()).delete(PATHS.__test__).expect(204)
+    await request(httpServer).delete(PATHS.__test__).expect(204)
     await app.close()
     await mongoServer.stop()
   })
 
   it('get empty posts', async () => {
-    await request(app.getHttpServer()).get(PATHS.posts).expect(200, {
+    await request(httpServer).get(PATHS.posts).expect(200, {
       items: [],
       page: 1,
       pageSize: 10,
@@ -52,7 +38,7 @@ describe('PostsController (e2e)', () => {
 
   let createdBlog: any = null
   it('create valid blog', async () => {
-    const res = await request(app.getHttpServer())
+    const res = await request(httpServer)
       .post(PATHS.blogs)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -69,14 +55,14 @@ describe('PostsController (e2e)', () => {
   })
 
   it('get created blog by id', async () => {
-    const res = await request(app.getHttpServer())
+    const res = await request(httpServer)
       .get(`${PATHS.blogs}/${createdBlog.id}`)
       .expect(200, createdBlog)
     createdBlog = res.body
   })
 
   it('create post without auth', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .post(PATHS.posts)
       .send({
         blogId: createdBlog.id,
@@ -89,7 +75,7 @@ describe('PostsController (e2e)', () => {
 
   it('create invalid post', async () => {
     const mongoId = new ObjectId().toHexString()
-    const res = await request(app.getHttpServer())
+    const res = await request(httpServer)
       .post(PATHS.posts)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -122,7 +108,7 @@ describe('PostsController (e2e)', () => {
   })
 
   it('get posts without invalid post', async () => {
-    await request(app.getHttpServer()).get(PATHS.posts).expect(200, {
+    await request(httpServer).get(PATHS.posts).expect(200, {
       items: [],
       page: 1,
       pageSize: 10,
@@ -133,7 +119,7 @@ describe('PostsController (e2e)', () => {
 
   let createdPost: any = null
   it('create valid post', async () => {
-    const res = await request(app.getHttpServer())
+    const res = await request(httpServer)
       .post(PATHS.posts)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -152,13 +138,13 @@ describe('PostsController (e2e)', () => {
   })
 
   it('get created post by id', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .get(`${PATHS.posts}/${createdPost.id}`)
       .expect(200, createdPost)
   })
 
   it('get posts with created post', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .get(PATHS.posts)
       .expect(200, {
         items: [createdPost],
@@ -171,7 +157,7 @@ describe('PostsController (e2e)', () => {
 
   it('update post with invalid data', async () => {
     const mongoId = new ObjectId().toHexString()
-    const res = await request(app.getHttpServer())
+    const res = await request(httpServer)
       .put(`${PATHS.posts}/605c77432fafeaccf424bb55`)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -206,7 +192,7 @@ describe('PostsController (e2e)', () => {
   it('update post with non-existing id', async () => {
     const mongoIdForPost = new ObjectId().toHexString()
     const mongoIdForBlog = new ObjectId().toHexString()
-    await request(app.getHttpServer())
+    await request(httpServer)
       .put(`${PATHS.posts}/${mongoIdForPost}`)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -219,7 +205,7 @@ describe('PostsController (e2e)', () => {
   })
 
   it('update post with valid data', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .put(`${PATHS.posts}/${createdPost.id}`)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -232,7 +218,7 @@ describe('PostsController (e2e)', () => {
   })
 
   it('get updated post by id', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .get(`${PATHS.posts}/${createdPost.id}`)
       .expect(200)
       .expect({
@@ -254,20 +240,20 @@ describe('PostsController (e2e)', () => {
 
   it('delete created post with non-existing id', async () => {
     const mongoId = new ObjectId().toHexString()
-    await request(app.getHttpServer())
+    await request(httpServer)
       .delete(`${PATHS.posts}/${mongoId}`)
       .set('Authorization', `Basic ${credentials}`)
       .expect(404)
   })
 
   it('delete post without auth', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .delete(`${PATHS.posts}/${createdPost.id}`)
       .expect(401)
   })
 
   it('delete created post', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .delete(`${PATHS.posts}/${createdPost.id}`)
       .set('Authorization', `Basic ${credentials}`)
       .expect(204)

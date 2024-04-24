@@ -1,47 +1,33 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { AppModule } from '../src/app.module'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { PATHS } from '../src/base/const/paths'
-import { ConfigService } from '@nestjs/config'
 import { ObjectId } from 'mongodb'
-import * as process from 'process'
-import { applyAppSettings } from '../src/settings/apply-app-settings'
+import process from 'process'
+import { initTestSettings } from './utils/init-test.settings'
 
 describe('BlogsController (e2e)', () => {
   let app: INestApplication
   let mongoServer: MongoMemoryServer
+  let httpServer: any
   const credentials = Buffer.from(
     `${process.env.BASIC_LOGIN}:${process.env.BASIC_PASSWORD}`,
   ).toString('base64')
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create()
-    process.env.MONGO_URL = mongoServer.getUri()
-
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
-
-    app = moduleFixture.createNestApplication()
-    applyAppSettings(app)
-    await app.init()
-    const configService = app.get(ConfigService)
-    const env = configService.get<string>('env')
-    console.log(`Environment: ${env}`)
-
-    await request(app.getHttpServer()).delete(PATHS.__test__).expect(204)
+    const res = await initTestSettings()
+    app = res.app
+    httpServer = res.httpServer
   })
 
   afterAll(async () => {
-    await request(app.getHttpServer()).delete(PATHS.__test__).expect(204)
+    await request(httpServer).delete(PATHS.__test__).expect(204)
     await app.close()
     await mongoServer.stop()
   })
 
   it('get all blogs (GET)', async () => {
-    const res = await request(app.getHttpServer()).get(PATHS.blogs).expect(200)
+    const res = await request(httpServer).get(PATHS.blogs).expect(200)
 
     expect(res.body).toEqual({
       items: [],
@@ -53,7 +39,7 @@ describe('BlogsController (e2e)', () => {
   })
 
   it('create blog without auth', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .post(PATHS.blogs)
       .send({
         name: 'Valid name',
@@ -64,7 +50,7 @@ describe('BlogsController (e2e)', () => {
   })
 
   it('create invalid blog', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .post(PATHS.blogs)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -91,7 +77,7 @@ describe('BlogsController (e2e)', () => {
   })
 
   it('get blogs without invalid blog', async () => {
-    await request(app.getHttpServer()).get(PATHS.blogs).expect(200, {
+    await request(httpServer).get(PATHS.blogs).expect(200, {
       items: [],
       page: 1,
       pageSize: 10,
@@ -102,7 +88,7 @@ describe('BlogsController (e2e)', () => {
 
   let createdBlog: any = null
   it('create valid blog', async () => {
-    const res = await request(app.getHttpServer())
+    const res = await request(httpServer)
       .post(PATHS.blogs)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -119,13 +105,13 @@ describe('BlogsController (e2e)', () => {
   })
 
   it('get created blog by id', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .get(`${PATHS.blogs}/${createdBlog.id}`)
       .expect(200, createdBlog)
   })
 
   it('get blogs with created blog', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .get(PATHS.blogs)
       .expect(200, {
         items: [createdBlog],
@@ -137,7 +123,7 @@ describe('BlogsController (e2e)', () => {
   })
 
   it('update blog with invalid data', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .put(`${PATHS.blogs}/${createdBlog.id}`)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -165,7 +151,7 @@ describe('BlogsController (e2e)', () => {
 
   it('update blog with non-existing id', async () => {
     const validMongoID = new ObjectId().toHexString()
-    await request(app.getHttpServer())
+    await request(httpServer)
       .put(`${PATHS.blogs}/${validMongoID}`)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -178,20 +164,20 @@ describe('BlogsController (e2e)', () => {
 
   it('delete created blog with non-existing id', async () => {
     const validMongoID = new ObjectId().toHexString()
-    await request(app.getHttpServer())
+    await request(httpServer)
       .delete(`${PATHS.blogs}/${validMongoID}`)
       .set('Authorization', `Basic ${credentials}`)
       .expect(404)
   })
 
   it('delete blog without auth', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .delete(`${PATHS.blogs}/${createdBlog.id}`)
       .expect(401)
   })
 
   it('delete created blog', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer)
       .delete(`${PATHS.blogs}/${createdBlog.id}`)
       .set('Authorization', `Basic ${credentials}`)
       .expect(204)

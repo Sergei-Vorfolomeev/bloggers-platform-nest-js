@@ -1,20 +1,17 @@
 import request from 'supertest'
 import { PATHS } from '../../src/base/const/paths'
-import { ConfigService } from '@nestjs/config'
 
-export class UsersTestHelper {
-  private readonly adminLogin: string
-  private readonly adminPassword: string
+export class UserTestHelper {
+  private readonly credentials: string
 
-  constructor(private readonly configService: ConfigService) {
-    this.adminLogin = this.configService.get('basicAuth.BASIC_LOGIN', '')
-    this.adminPassword = this.configService.get('basicAuth.BASIC_PASSWORD', '')
+  constructor(credentials: string) {
+    this.credentials = credentials
   }
 
   async createUser(httpServer: any) {
     const res = await request(httpServer)
       .post(PATHS.users)
-      .auth(this.adminLogin, this.adminPassword)
+      .set('Authorization', `Basic ${this.credentials}`)
       .send({
         login: 'test-login',
         email: 'test@gmail.com',
@@ -30,7 +27,7 @@ export class UsersTestHelper {
       try {
         const res = await request(httpServer)
           .post(PATHS.users)
-          .auth(this.adminLogin, this.adminPassword)
+          .set('Authorization', `Basic ${this.credentials}`)
           .send({
             login: `test-${i}`,
             email: `test-${i}-@gmail.com`,
