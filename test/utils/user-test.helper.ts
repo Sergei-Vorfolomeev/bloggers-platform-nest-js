@@ -52,4 +52,29 @@ export class UserTestHelper {
       password: 'test-pass',
     }
   }
+
+  async loginUserWithUserAgent(
+    httpServer: any,
+    loginOrEmail: string,
+    password: string,
+    userAgent: string,
+  ) {
+    const res = await request(httpServer)
+      .post(`${PATHS.auth}/login`)
+      .set('User-Agent', userAgent)
+      .send({
+        loginOrEmail,
+        password,
+      })
+      .expect(200)
+
+    const cookieHeader = res.headers['set-cookie']
+    const refreshToken = cookieHeader[0].split(';')[0].split('=')[1]
+    expect(refreshToken).toEqual(expect.any(String))
+    expect(refreshToken).toContain('.')
+    expect(res.body.accessToken).toEqual(expect.any(String))
+    expect(res.body.accessToken).toContain('.')
+
+    return { accessToken: res.body.accessToken, refreshToken }
+  }
 }
