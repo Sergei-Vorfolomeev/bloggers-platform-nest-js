@@ -2,16 +2,10 @@ import { PATHS } from '../../src/base/const/paths'
 import request from 'supertest'
 
 export class BlogTestHelper {
-  private readonly credentials: string
-
-  constructor(credentials: string) {
-    this.credentials = credentials
-  }
-
-  async createBlog(httpServer: any) {
+  async createBlog(httpServer: any, credentials: string) {
     const response = await request(httpServer)
       .post(PATHS.blogs)
-      .set('Authorization', `Basic ${this.credentials}`)
+      .set('Authorization', `Basic ${credentials}`)
       .send({
         name: 'test-blog',
         description: 'test',
@@ -21,13 +15,13 @@ export class BlogTestHelper {
     return response.body
   }
 
-  async createManyBlogs(httpServer: any, count: number) {
+  async createManyBlogs(httpServer: any, count: number, credentials: string) {
     const blogs = []
     for (let i = 0; i < count; i++) {
       try {
         const response = await request(httpServer)
           .post(PATHS.blogs)
-          .set('Authorization', `Basic ${this.credentials}`)
+          .set('Authorization', `Basic ${credentials}`)
           .send({
             name: `test-${i}-blog`,
             description: `test-${i}-description`,

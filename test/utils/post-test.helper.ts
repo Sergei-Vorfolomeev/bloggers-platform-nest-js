@@ -3,19 +3,17 @@ import { BlogTestHelper } from './blog-test.helper'
 import { PATHS } from '../../src/base/const/paths'
 
 export class PostTestHelper {
-  private readonly credentials: string
   private readonly blogTestHelper: BlogTestHelper
 
-  constructor(credentials: string, blogTestHelper: BlogTestHelper) {
-    this.credentials = credentials
+  constructor(blogTestHelper: BlogTestHelper) {
     this.blogTestHelper = blogTestHelper
   }
 
-  async createPost(app: any) {
-    const blog = await this.blogTestHelper.createBlog(app)
+  async createPost(app: any, credentials: string) {
+    const blog = await this.blogTestHelper.createBlog(app, credentials)
     const response = await request(app)
       .post(PATHS.posts)
-      .set('Authorization', `Basic ${this.credentials}`)
+      .set('Authorization', `Basic ${credentials}`)
       .send({
         blogId: blog.id,
         title: 'Post title',
@@ -26,14 +24,14 @@ export class PostTestHelper {
     return response.body
   }
 
-  async createPosts(app: any, count: number) {
-    const blog = await this.blogTestHelper.createBlog(app)
+  async createPosts(app: any, count: number, credentials: string) {
+    const blog = await this.blogTestHelper.createBlog(app, credentials)
     const posts = []
     for (let i = 0; i < count; i++) {
       try {
         const response = await request(app)
           .post(PATHS.posts)
-          .set('Authorization', `Basic ${this.credentials}`)
+          .set('Authorization', `Basic ${credentials}`)
           .send({
             blogId: blog.id,
             title: `Post-${i}-title`,
@@ -50,9 +48,13 @@ export class PostTestHelper {
     return { reversedPosts, blog }
   }
 
-  async createPostWithComment(app: any, accessToken: string) {
-    const post = await this.createPost(app)
-    const response = await request(app)
+  async createPostWithComment(
+    httpServer: any,
+    credentials: string,
+    accessToken: string,
+  ) {
+    const post = await this.createPost(httpServer, credentials)
+    const response = await request(httpServer)
       .post(`${PATHS.posts}/${post.id}/comments`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({

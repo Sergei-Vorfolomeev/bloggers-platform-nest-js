@@ -77,4 +77,13 @@ export class UserTestHelper {
 
     return { accessToken: res.body.accessToken, refreshToken }
   }
+
+  async meRequest(httpServer: any, token: string) {
+    const res = await request(httpServer)
+      .get(`${PATHS.auth}/me`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200)
+
+    return res.body
+  }
 }
