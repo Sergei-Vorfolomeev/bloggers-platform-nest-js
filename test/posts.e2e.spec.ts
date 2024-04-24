@@ -12,7 +12,9 @@ import { ObjectId } from 'mongodb'
 describe('PostsController (e2e)', () => {
   let app: NestApplication
   let mongoServer: MongoMemoryServer
-  const credentials = Buffer.from('admin:qwerty').toString('base64')
+  const credentials = Buffer.from(
+    `${process.env.BASIC_LOGIN}:${process.env.BASIC_PASSWORD}`,
+  ).toString('base64')
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create()

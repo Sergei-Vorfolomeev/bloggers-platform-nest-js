@@ -24,8 +24,8 @@ export class BasicAuthGuard implements CanActivate {
     const [login, password] = decodedToken.split(':')
 
     if (
-      login === this.configService.get<string>('basicAuth.ADMIN_LOGIN') &&
-      password === this.configService.get<string>('basicAuth.ADMIN_PASSWORD')
+      login === this.configService.get<string>('basicAuth.BASIC_LOGIN') &&
+      password === this.configService.get<string>('basicAuth.BASIC_PASSWORD')
     ) {
       return true
     }

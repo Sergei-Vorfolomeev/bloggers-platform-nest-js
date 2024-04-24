@@ -20,8 +20,8 @@ export default () => ({
     MONGO_URI: process.env.MONGO_URL,
   },
   basicAuth: {
-    ADMIN_LOGIN: 'admin',
-    ADMIN_PASSWORD: 'qwerty',
+    BASIC_LOGIN: process.env.BASIC_LOGIN,
+    BASIC_PASSWORD: process.env.BASIC_PASSWORD,
   },
   jwtAdapter: {
     SECRET_KEY_1: process.env.SECRET_KEY_1 || '123',

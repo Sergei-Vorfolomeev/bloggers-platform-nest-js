@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class EmailAdapter {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(protected readonly configService: ConfigService) {}
 
   async sendEmail(email: string, subject: string, message: string) {
     try {

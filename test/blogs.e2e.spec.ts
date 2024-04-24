@@ -12,7 +12,9 @@ import { applyAppSettings } from '../src/settings/apply-app-settings'
 describe('BlogsController (e2e)', () => {
   let app: INestApplication
   let mongoServer: MongoMemoryServer
-  const credentials = Buffer.from('admin:qwerty').toString('base64')
+  const credentials = Buffer.from(
+    `${process.env.BASIC_LOGIN}:${process.env.BASIC_PASSWORD}`,
+  ).toString('base64')
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create()
