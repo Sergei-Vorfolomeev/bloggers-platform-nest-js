@@ -7,11 +7,12 @@ import { CryptoAdapter } from './crypto.adapter'
 import { UsersRepository } from '../../features/users/infrastructure/users.repository'
 import { DevicesRepository } from '../../features/devices/infrastructure/devices.repository'
 import { ConfigService } from '@nestjs/config'
+import { ConfigType } from '../../settings/configuration'
 
 @Injectable()
 export class JwtAdapter {
   constructor(
-    protected readonly configService: ConfigService,
+    protected readonly configService: ConfigService<ConfigType, true>,
     protected readonly cryptoAdapter: CryptoAdapter,
     protected readonly usersRepository: UsersRepository,
     protected readonly devicesRepository: DevicesRepository,
@@ -24,8 +25,12 @@ export class JwtAdapter {
   ) {
     const secretKey =
       type === 'access'
-        ? this.configService.get<string>('jwtAdapter.SECRET_KEY_1', '')
-        : this.configService.get<string>('jwtAdapter.SECRET_KEY_2', '')
+        ? this.configService.get('jwtAdapter.SECRET_KEY_1', {
+            infer: true,
+          })
+        : this.configService.get('jwtAdapter.SECRET_KEY_2', {
+            infer: true,
+          })
 
     return jwt.sign(
       {
@@ -44,8 +49,8 @@ export class JwtAdapter {
     try {
       const secretKey =
         type === 'access'
-          ? this.configService.get<string>('jwtAdapter.SECRET_KEY_1', '')
-          : this.configService.get<string>('jwtAdapter.SECRET_KEY_2', '')
+          ? this.configService.get('jwtAdapter.SECRET_KEY_1', { infer: true })
+          : this.configService.get('jwtAdapter.SECRET_KEY_2', { infer: true })
       return jwt.verify(token, secretKey) as JwtPayload
     } catch (error) {
       console.error('Token verification has the following error: ' + error)

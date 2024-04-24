@@ -13,7 +13,7 @@ const KEY = crypto.pbkdf2Sync(
 // Сгенерируем инициализирующий вектор
 const IV = crypto.randomBytes(16) // 128 бит
 
-export default () => ({
+const config = () => ({
   env: process.env.NODE_ENV,
   port: 3000,
   db: {
@@ -36,3 +36,7 @@ export default () => ({
     INIT_VECTOR_FOR_CIPHER: IV,
   },
 })
+
+export type ConfigType = ReturnType<typeof config>
+
+export default config

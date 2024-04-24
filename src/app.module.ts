@@ -43,7 +43,7 @@ import {
 } from './features/connections/domain/connection.entity'
 import { RateLimiter } from './infrastructure/middlewares/rate-limiter.middleware'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import configuration from './settings/configuration'
+import configuration, { ConfigType } from './settings/configuration'
 
 @Module({
   imports: [
@@ -53,9 +53,9 @@ import configuration from './settings/configuration'
       load: [configuration],
     }),
     MongooseModule.forRootAsync({
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService<ConfigType, true>) => ({
         dbName: 'bloggers-platform',
-        uri: configService.get<string>('db.MONGO_URI'),
+        uri: configService.get('db.MONGO_URI', { infer: true }),
       }),
       inject: [ConfigService],
     }),
