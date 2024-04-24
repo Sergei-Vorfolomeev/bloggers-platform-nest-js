@@ -24,13 +24,14 @@ describe('CommentsController (e2e)', () => {
   beforeAll(async () => {
     const res = await initTestSettings()
     app = res.app
+    mongoServer = res.mongoServer
     httpServer = res.httpServer
   })
 
   afterAll(async () => {
     await request(httpServer).delete(PATHS.__test__).expect(204)
-    await app.close()
     await mongoServer.stop()
+    await app.close()
   })
 
   let users: any = null

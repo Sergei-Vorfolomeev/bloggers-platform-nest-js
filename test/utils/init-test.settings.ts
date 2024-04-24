@@ -38,5 +38,5 @@ export const initTestSettings = async (
 
   await request(httpServer).delete(PATHS.__test__).expect(204)
 
-  return { app, httpServer }
+  return { app, mongoServer, httpServer }
 }

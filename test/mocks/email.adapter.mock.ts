@@ -1,9 +1,10 @@
 import { EmailAdapter } from '../../src/base/adapters/email.adapter'
 import { SentMessageInfo } from 'nodemailer'
 import { ConfigService } from '@nestjs/config'
+import { ConfigType } from '../../src/settings/configuration'
 
 export class EmailAdapterMock extends EmailAdapter {
-  constructor(configService: ConfigService) {
+  constructor(configService: ConfigService<ConfigType, true>) {
     super(configService)
   }
 

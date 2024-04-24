@@ -9,9 +9,9 @@ export class PostTestHelper {
     this.blogTestHelper = blogTestHelper
   }
 
-  async createPost(app: any, credentials: string) {
-    const blog = await this.blogTestHelper.createBlog(app, credentials)
-    const response = await request(app)
+  async createPost(httpServer: any, credentials: string) {
+    const blog = await this.blogTestHelper.createBlog(httpServer, credentials)
+    const response = await request(httpServer)
       .post(PATHS.posts)
       .set('Authorization', `Basic ${credentials}`)
       .send({
@@ -24,12 +24,12 @@ export class PostTestHelper {
     return response.body
   }
 
-  async createPosts(app: any, count: number, credentials: string) {
-    const blog = await this.blogTestHelper.createBlog(app, credentials)
+  async createPosts(httpServer: any, count: number, credentials: string) {
+    const blog = await this.blogTestHelper.createBlog(httpServer, credentials)
     const posts = []
     for (let i = 0; i < count; i++) {
       try {
-        const response = await request(app)
+        const response = await request(httpServer)
           .post(PATHS.posts)
           .set('Authorization', `Basic ${credentials}`)
           .send({
