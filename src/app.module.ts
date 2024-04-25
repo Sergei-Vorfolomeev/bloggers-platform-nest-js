@@ -48,12 +48,31 @@ import { CqrsModule } from '@nestjs/cqrs'
 import { DeleteBlogUseCase } from './features/blogs/application/usecases/delete-blog.usecase'
 import { UpdateBlogUseCase } from './features/blogs/application/usecases/update-blog.usecase'
 import { CreatePostInsideBlogUseCase } from './features/blogs/application/usecases/create-post-inside-blog.usecase'
+import { LoginUseCase } from './features/auth/application/usecases/login.usecase'
+import { RegisterUserCase } from './features/auth/application/usecases/register.usercase'
+import { ConfirmEmailUseCase } from './features/auth/application/usecases/confirm-email.usecase'
+import { ResendConfirmationCodeUseCase } from './features/auth/application/usecases/resend-confirmation-code.usecase'
+import { LogoutUseCase } from './features/auth/application/usecases/logout.usecase'
+import { UpdateTokensUseCase } from './features/auth/application/usecases/update-tokens.usecase'
+import { RecoverPasswordUseCase } from './features/auth/application/usecases/recover-password.usecase'
+import { UpdatePasswordUseCase } from './features/auth/application/usecases/update-password.usecase'
 
 const blogsUseCases = [
   CreateBlogUseCase,
   DeleteBlogUseCase,
   UpdateBlogUseCase,
   CreatePostInsideBlogUseCase,
+]
+
+const usersUseCases = [
+  LoginUseCase,
+  RegisterUserCase,
+  ConfirmEmailUseCase,
+  ResendConfirmationCodeUseCase,
+  LogoutUseCase,
+  UpdateTokensUseCase,
+  RecoverPasswordUseCase,
+  UpdatePasswordUseCase,
 ]
 
 @Module({
@@ -116,6 +135,7 @@ const blogsUseCases = [
     EmailAdapter,
 
     ...blogsUseCases,
+    ...usersUseCases,
 
     // альтернативные способы регистрации провайдера
     /* {

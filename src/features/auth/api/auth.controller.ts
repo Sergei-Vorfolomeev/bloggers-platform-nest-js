@@ -10,7 +10,6 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { UsersQueryRepository } from '../../users/infrastructure/users.query.repository'
-import { AuthService } from '../application/auth.service'
 import {
   LoginInputModel,
   NewPasswordRecoveryInputModel,
@@ -28,11 +27,20 @@ import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guar
 import { LoginSuccessOutputModel } from './models/auth-output.models'
 import { RefreshToken } from '../../../infrastructure/decorators/refresh-token.decorator'
 import { User } from '../../../infrastructure/decorators/user.decorator'
+import { LoginCommand } from '../application/usecases/login.usecase'
+import { CommandBus } from '@nestjs/cqrs'
+import { RegisterUserCommand } from '../application/usecases/register.usercase'
+import { ConfirmEmailCommand } from '../application/usecases/confirm-email.usecase'
+import { ResendConfirmationCodeCommand } from '../application/usecases/resend-confirmation-code.usecase'
+import { LogoutCommand } from '../application/usecases/logout.usecase'
+import { UpdateTokensCommand } from '../application/usecases/update-tokens.usecase'
+import { RecoverPasswordCommand } from '../application/usecases/recover-password.usecase'
+import { UpdatePasswordCommand } from '../application/usecases/update-password.usecase'
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    protected readonly authService: AuthService,
+    private readonly commandBus: CommandBus,
     protected readonly usersQueryRepository: UsersQueryRepository,
   ) {}
 
@@ -46,12 +54,13 @@ export class AuthController {
     const { loginOrEmail, password } = body
     const deviceName = req.headers['user-agent'] || 'unknown'
     const clientIp = req.ip || 'unknown'
-    const { statusCode, error, data } = await this.authService.login(
+    const command = new LoginCommand(
       loginOrEmail,
       password,
-      deviceName.toString(),
+      deviceName,
       clientIp,
     )
+    const { statusCode, error, data } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
     res.cookie('refreshToken', data!.refreshToken, {
       httpOnly: true,
@@ -64,11 +73,8 @@ export class AuthController {
   @HttpCode(204)
   async registration(@Body() body: UserInputModel) {
     const { login, email, password } = body
-    const { statusCode, error } = await this.authService.registerUser(
-      login,
-      email,
-      password,
-    )
+    const command = new RegisterUserCommand(login, email, password)
+    const { statusCode, error } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
   }
 
@@ -94,9 +100,8 @@ export class AuthController {
   async registrationConfirmation(
     @Body() body: RegistrationConfirmationCodeModel,
   ) {
-    const { code } = body
-    const { statusCode, error } =
-      await this.authService.confirmEmailByCode(code)
+    const command = new ConfirmEmailCommand(body.code)
+    const { statusCode, error } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
   }
 
@@ -105,9 +110,8 @@ export class AuthController {
   async registrationEmailResending(
     @Body() body: RegistrationEmailResendingModel,
   ) {
-    const { email } = body
-    const { statusCode, error } =
-      await this.authService.resendConfirmationCode(email)
+    const command = new ResendConfirmationCodeCommand(body.email)
+    const { statusCode, error } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
   }
 
@@ -117,8 +121,8 @@ export class AuthController {
     @RefreshToken() refreshToken: string,
     @Res() res: Response<LoginSuccessOutputModel>,
   ): Promise<void> {
-    const { statusCode, error, data } =
-      await this.authService.updateTokens(refreshToken)
+    const command = new UpdateTokensCommand(refreshToken)
+    const { statusCode, error, data } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
     res.cookie('refreshToken', data!.refreshToken, {
       httpOnly: true,
@@ -130,15 +134,16 @@ export class AuthController {
   @Post('logout')
   @HttpCode(204)
   async logout(@RefreshToken() refreshToken: string) {
-    const { statusCode, error } = await this.authService.logout(refreshToken)
+    const command = new LogoutCommand(refreshToken)
+    const { statusCode, error } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
   }
 
   @Post('password-recovery')
   @HttpCode(204)
   async recoverPassword(@Body() body: PasswordRecoveryInputModel) {
-    const { email } = body
-    const { statusCode, error } = await this.authService.recoverPassword(email)
+    const command = new RecoverPasswordCommand(body.email)
+    const { statusCode, error } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
   }
 
@@ -146,10 +151,8 @@ export class AuthController {
   @HttpCode(204)
   async updatePassword(@Body() body: NewPasswordRecoveryInputModel) {
     const { recoveryCode, newPassword } = body
-    const { statusCode, error } = await this.authService.updatePassword(
-      recoveryCode,
-      newPassword,
-    )
+    const command = new UpdatePasswordCommand(recoveryCode, newPassword)
+    const { statusCode, error } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
   }
 }
