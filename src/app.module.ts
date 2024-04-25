@@ -1,6 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { BlogsController } from './features/blogs/api/blogs.controller'
-import { BlogsService } from './features/blogs/application/blogs.service'
 import { BlogsRepository } from './features/blogs/infrastructure/blogs.repository'
 import { BlogsQueryRepository } from './features/blogs/infrastructure/blogs.query.repository'
 import { MongooseModule } from '@nestjs/mongoose'
@@ -44,6 +43,18 @@ import {
 import { RateLimiter } from './infrastructure/middlewares/rate-limiter.middleware'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import configuration, { ConfigType } from './settings/configuration'
+import { CreateBlogUseCase } from './features/blogs/application/usecases/create-blog.usecase'
+import { CqrsModule } from '@nestjs/cqrs'
+import { DeleteBlogUseCase } from './features/blogs/application/usecases/delete-blog.usecase'
+import { UpdateBlogUseCase } from './features/blogs/application/usecases/update-blog.usecase'
+import { CreatePostInsideBlogUseCase } from './features/blogs/application/usecases/create-post-inside-blog.usecase'
+
+const blogsUseCases = [
+  CreateBlogUseCase,
+  DeleteBlogUseCase,
+  UpdateBlogUseCase,
+  CreatePostInsideBlogUseCase,
+]
 
 @Module({
   imports: [
@@ -68,6 +79,7 @@ import configuration, { ConfigType } from './settings/configuration'
       { name: Device.name, schema: DeviceSchema },
       { name: Connection.name, schema: ConnectionSchema },
     ]),
+    CqrsModule,
   ],
   controllers: [
     TestController,
@@ -82,7 +94,6 @@ import configuration, { ConfigType } from './settings/configuration'
   providers: [
     BlogIsExistConstraint,
     AuthService,
-    BlogsService,
     PostsService,
     UsersService,
     CommentsService,
@@ -103,6 +114,8 @@ import configuration, { ConfigType } from './settings/configuration'
     BcryptAdapter,
     CryptoAdapter,
     EmailAdapter,
+
+    ...blogsUseCases,
 
     // альтернативные способы регистрации провайдера
     /* {

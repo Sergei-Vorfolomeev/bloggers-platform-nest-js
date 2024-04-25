@@ -19,7 +19,6 @@ import { BlogOutputModel } from './models/blog.output.models'
 import { BlogInputModel, BlogsQueryParams } from './models/blog.input.models'
 import { Paginator, QueryParams } from '../../../base/types'
 import { ObjectId } from 'mongodb'
-import { BlogsService } from '../application/blogs.service'
 import { handleExceptions } from '../../../base/utils/handle-exceptions'
 import { PostOutputModel } from '../../posts/api/models/post.output.model'
 import { PostInputModel } from '../../posts/api/models/post.input.model'
@@ -27,14 +26,19 @@ import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.rep
 import { BasicAuthGuard } from '../../../infrastructure/guards/basic-auth.guard'
 import { Request } from 'express'
 import { UsersService } from '../../users/application/users.service'
+import { CommandBus } from '@nestjs/cqrs'
+import { CreateBlogCommand } from '../application/usecases/create-blog.usecase'
+import { DeleteBlogCommand } from '../application/usecases/delete-blog.usecase'
+import { CreatePostInsideBlogCommand } from '../application/usecases/create-post-inside-blog.usecase'
+import { UpdateBlogCommand } from '../application/usecases/update-blog.usecase'
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    private readonly blogsService: BlogsService,
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly usersService: UsersService,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -72,8 +76,10 @@ export class BlogsController {
   @Post()
   @UseGuards(BasicAuthGuard)
   async createBlog(@Body() body: BlogInputModel): Promise<BlogOutputModel> {
+    const { name, description, websiteUrl } = body
+    const command = new CreateBlogCommand(name, description, websiteUrl)
     const { statusCode, data: createdBlogId } =
-      await this.blogsService.createBlog(body)
+      await this.commandBus.execute(command)
     handleExceptions(statusCode)
     const blog = await this.blogsQueryRepository.getBlogById(createdBlogId!)
     if (!blog) {
@@ -89,7 +95,9 @@ export class BlogsController {
     if (!ObjectId.isValid(blogId)) {
       throw new NotFoundException()
     }
-    const { statusCode } = await this.blogsService.updateBlog(blogId, body)
+    const { name, description, websiteUrl } = body
+    const command = new UpdateBlogCommand(blogId, name, description, websiteUrl)
+    const { statusCode } = await this.commandBus.execute(command)
     handleExceptions(statusCode)
   }
 
@@ -100,7 +108,8 @@ export class BlogsController {
     if (!ObjectId.isValid(blogId)) {
       throw new NotFoundException()
     }
-    const { statusCode } = await this.blogsService.deleteBlog(blogId)
+    const command = new DeleteBlogCommand(blogId)
+    const { statusCode } = await this.commandBus.execute(command)
     handleExceptions(statusCode)
   }
 
@@ -151,8 +160,15 @@ export class BlogsController {
       const token = req.headers.authorization.split(' ')[1]
       userId = await this.usersService.getUserId(token)
     }
+    const { title, shortDescription, content } = body
+    const command = new CreatePostInsideBlogCommand(
+      blogId,
+      title,
+      shortDescription,
+      content,
+    )
     const { statusCode, data: createdPostId } =
-      await this.blogsService.createPostInsideBlog(blogId, body)
+      await this.commandBus.execute(command)
     handleExceptions(statusCode)
     const post = await this.postsQueryRepository.getPostById(
       createdPostId!,
