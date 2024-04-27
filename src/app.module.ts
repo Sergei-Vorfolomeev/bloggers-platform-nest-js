@@ -35,7 +35,7 @@ import { Device, DeviceSchema } from './features/devices/domain/device.entity'
 import { DevicesRepository } from './features/devices/infrastructure/devices.repository'
 import { DevicesController } from './features/devices/api/devices.controller'
 import { TestController } from './test.controller'
-import { BlogIsExistConstraint } from './infrastructure/decorators/blog-is-exist.decorator'
+import { BlogIsExistConstraint } from './infrastructure/decorators/validators/blog-is-exist.decorator'
 import {
   Connection,
   ConnectionSchema,
@@ -79,7 +79,7 @@ const usersUseCases = [
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env.development.local', '.env.prod'],
       load: [configuration],
     }),
     MongooseModule.forRootAsync({

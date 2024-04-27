@@ -1,6 +1,6 @@
 import { QueryParams } from '../../../../base/types'
 import { IsUrl, MaxLength } from 'class-validator'
-import { isValidString } from '../../../../infrastructure/decorators/is-valid-string.decorator'
+import { isValidString } from '../../../../infrastructure/decorators/validators/is-valid-string.decorator'
 
 export type BlogsQueryParams = {
   searchNameTerm?: string

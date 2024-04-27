@@ -14,6 +14,7 @@ export const initTestSettings = async (
 ) => {
   const mongoServer = await MongoMemoryServer.create()
   process.env.MONGO_URL = mongoServer.getUri()
+  process.env.ENV = 'TESTING'
 
   const testingModuleBuilder = await Test.createTestingModule({
     imports: [AppModule],

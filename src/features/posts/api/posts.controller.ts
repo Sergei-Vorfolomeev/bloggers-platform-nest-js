@@ -28,8 +28,8 @@ import { CommentsService } from '../../comments/application/comments.service'
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query.repository'
 import { BearerAuthGuard } from '../../../infrastructure/guards/bearer-auth.guard'
 import { LikeInputModel } from '../../likes/api/models/like.input.model'
-import { AccessToken } from '../../../infrastructure/decorators/access-token.decorator'
-import { User } from '../../../infrastructure/decorators/user.decorator'
+import { AccessToken } from '../../../infrastructure/decorators/params/access-token.decorator'
+import { User } from '../../../infrastructure/decorators/params/user.decorator'
 import { UserAttachedInRequest } from '../../users/api/models/user.input.model'
 
 @Controller('posts')

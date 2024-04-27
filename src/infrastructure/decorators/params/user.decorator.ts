@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
-import { UserAttachedInRequest } from '../../features/users/api/models/user.input.model'
+import { UserAttachedInRequest } from '../../../features/users/api/models/user.input.model'
 
 export const User = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): UserAttachedInRequest | undefined => {

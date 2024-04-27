@@ -1,6 +1,6 @@
 import { MaxLength } from 'class-validator'
-import { isValidString } from '../../../../infrastructure/decorators/is-valid-string.decorator'
-import { BlogIsExist } from '../../../../infrastructure/decorators/blog-is-exist.decorator'
+import { isValidString } from '../../../../infrastructure/decorators/validators/is-valid-string.decorator'
+import { BlogIsExist } from '../../../../infrastructure/decorators/validators/blog-is-exist.decorator'
 
 export class PostInputModel {
   @MaxLength(30)

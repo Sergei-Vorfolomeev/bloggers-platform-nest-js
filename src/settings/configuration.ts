@@ -14,10 +14,10 @@ const KEY = crypto.pbkdf2Sync(
 const IV = crypto.randomBytes(16) // 128 бит
 
 const config = () => ({
-  env: process.env.NODE_ENV,
-  port: 3000,
+  env: process.env.ENV,
+  port: Number(process.env.PORT) || 8080,
   db: {
-    MONGO_URI: process.env.MONGO_URL,
+    MONGO_URI: process.env.MONGO_URI,
   },
   basicAuth: {
     BASIC_LOGIN: process.env.BASIC_LOGIN,

@@ -1,0 +1,12 @@
+name: Test & Deploy
+#env:
+on:
+  push:
+    branches: [ "staging" ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
