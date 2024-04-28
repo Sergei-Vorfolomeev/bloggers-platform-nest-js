@@ -18,11 +18,11 @@ jobs:
         uses: actions/checkout@v3  # clone repository
 
       - name: Install dependencies
-        uses: pnpm
+        run: pnpm
 
       - name: run e2e tests
-        uses: pnpm run test:e2e
-        env: ${{vars.ENV_GH}} # env for tests
+        run: pnpm run test:e2e
+        env: ${{ vars.ENV_GH }} # env for tests
 
     # https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
     deploy:
