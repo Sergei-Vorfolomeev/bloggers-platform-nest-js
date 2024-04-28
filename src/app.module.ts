@@ -83,7 +83,7 @@ const usersUseCases = [
       load: [configuration],
     }),
     MongooseModule.forRootAsync({
-      useFactory: async (configService: ConfigService<ConfigType, true>) => ({
+      useFactory: (configService: ConfigService<ConfigType, true>) => ({
         dbName: 'bloggers-platform',
         uri: configService.get('db.MONGO_URI', { infer: true }),
       }),
