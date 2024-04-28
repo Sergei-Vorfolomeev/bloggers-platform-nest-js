@@ -22,7 +22,8 @@ jobs:
 
       - name: run e2e tests
         run: npm run test
-        env: ${{ vars.ENV }} # env for tests
+        env:
+          ENV: ${{ vars.ENV_GH }} # env for tests
 
     # https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
   deploy:
