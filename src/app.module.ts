@@ -79,7 +79,7 @@ const usersUseCases = [
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env.dev', '.env.prod'],
       load: [configuration],
     }),
     MongooseModule.forRootAsync({
