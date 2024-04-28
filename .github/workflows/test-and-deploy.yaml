@@ -1,0 +1,24 @@
+name: Test & Deploy
+
+env:
+  VERCEL_ORG_ID: ${{secrets.VERCEL_ORG_ID}}
+  VERCEL_PROJECT_ID: ${{secrets.VERCEL_PROJECT_ID}}
+
+on:
+  push:
+    branches: [ 'staging' ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3  # clone repository
+
+      - name: Install dependencies
+        uses: pnpm
+
+      - name: run e2e tests
+        uses:
