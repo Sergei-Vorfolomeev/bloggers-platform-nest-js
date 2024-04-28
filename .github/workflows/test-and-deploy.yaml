@@ -21,7 +21,7 @@ jobs:
         run: pnpm
 
       - name: run e2e tests
-        run: pnpm run test:e2e
+        run: pnpm test:e2e
         env: ${{ vars.ENV_GH }} # env for tests
 
     # https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
