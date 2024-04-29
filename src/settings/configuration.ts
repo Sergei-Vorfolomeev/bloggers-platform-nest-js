@@ -17,7 +17,7 @@ const config = () => ({
   env: process.env.NODE_ENV,
   port: 3000,
   db: {
-    MONGO_URI: process.env.MONGO_URL,
+    MONGO_URI: process.env.MONGO_URI,
   },
   basicAuth: {
     BASIC_LOGIN: process.env.BASIC_LOGIN,
