@@ -62,11 +62,11 @@ export class AuthController {
     )
     const { statusCode, error, data } = await this.commandBus.execute(command)
     handleExceptions(statusCode, error)
-    res.cookie('refreshToken', data!.refreshToken, {
+    res.cookie('refreshToken', data.refreshToken, {
       httpOnly: true,
       secure: true,
     })
-    res.status(200).send({ accessToken: data!.accessToken })
+    res.send({ accessToken: data.accessToken })
   }
 
   @Post('registration')

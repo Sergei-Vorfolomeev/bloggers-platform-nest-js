@@ -43,7 +43,7 @@ export class UsersService {
       password: hashedPassword,
       createdAt: new Date().toISOString(),
       emailConfirmation: {
-        confirmationCode: '',
+        confirmationCode: null,
         expirationDate: new Date(),
         isConfirmed: true,
       },

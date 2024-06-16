@@ -16,7 +16,6 @@ import { UsersController } from './features/users/api/users.controller'
 import { UsersService } from './features/users/application/users.service'
 import { BcryptAdapter } from './base/adapters/bcrypt.adapter'
 import { CryptoAdapter } from './base/adapters/crypto.adapter'
-import { AuthService } from './features/auth/application/auth.service'
 import { JwtAdapter } from './base/adapters/jwt.adapter'
 import { AuthController } from './features/auth/api/auth.controller'
 import { EmailAdapter } from './base/adapters/email.adapter'
@@ -56,6 +55,7 @@ import { LogoutUseCase } from './features/auth/application/usecases/logout.useca
 import { UpdateTokensUseCase } from './features/auth/application/usecases/update-tokens.usecase'
 import { RecoverPasswordUseCase } from './features/auth/application/usecases/recover-password.usecase'
 import { UpdatePasswordUseCase } from './features/auth/application/usecases/update-password.usecase'
+import { TypeOrmModule } from '@nestjs/typeorm'
 
 const blogsUseCases = [
   CreateBlogUseCase,
@@ -81,6 +81,19 @@ const usersUseCases = [
       isGlobal: true,
       envFilePath: ['.env.dev', '.env.prod'],
       load: [configuration],
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: (configService: ConfigService<ConfigType, true>) => ({
+        type: 'postgres',
+        host: 'localhost',
+        port: 5432,
+        username: configService.get('db.PG_USER_LOGIN', { infer: true }),
+        password: configService.get('db.PG_USER_PASSWORD', { infer: true }),
+        database: 'bloggers-platform',
+        autoLoadEntities: false,
+        synchronize: false,
+      }),
+      inject: [ConfigService],
     }),
     MongooseModule.forRootAsync({
       useFactory: (configService: ConfigService<ConfigType, true>) => ({
@@ -112,7 +125,6 @@ const usersUseCases = [
   // Регистрация провайдеров
   providers: [
     BlogIsExistConstraint,
-    AuthService,
     PostsService,
     UsersService,
     CommentsService,

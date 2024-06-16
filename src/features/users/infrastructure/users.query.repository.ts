@@ -6,9 +6,10 @@ import { InjectModel } from '@nestjs/mongoose'
 import { User, UserDocument } from '../domain/user.entity'
 import { Model } from 'mongoose'
 import { ObjectId, WithId } from 'mongodb'
+import { IUsersQueryRepository } from '../application/interfaces/users-query-repository.interface'
 
 @Injectable()
-export class UsersQueryRepository {
+export class UsersQueryRepository implements IUsersQueryRepository {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
@@ -66,7 +67,7 @@ export class UsersQueryRepository {
     return this.mapToView(user)
   }
 
-  private mapToView(user: WithId<UserDBModel>): UserOutputModel {
+  mapToView(user: WithId<UserDBModel>): UserOutputModel {
     return {
       id: user._id.toString(),
       email: user.email,

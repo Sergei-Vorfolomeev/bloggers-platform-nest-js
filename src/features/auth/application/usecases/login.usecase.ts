@@ -78,7 +78,7 @@ export class LoginUseCase implements ICommandHandler {
       refreshToken: tokens.encryptedRefreshToken,
       lastActiveDate: new Date().toISOString(),
       expirationDate: add(new Date(), {
-        seconds: 20,
+        seconds: 120,
       }).toISOString(),
     }
     await this.devicesRepository.addNewDevice(newDevice)

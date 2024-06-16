@@ -12,7 +12,7 @@ export type UserDBModel = {
 }
 
 export class EmailConfirmationType {
-  confirmationCode: string
+  confirmationCode: string | null
   expirationDate: Date
   isConfirmed: boolean
 }

@@ -4,9 +4,10 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { User, UserDocument } from '../domain/user.entity'
 import { ObjectId, WithId } from 'mongodb'
+import { IUsersRepository } from '../application/interfaces/users-repository.interface'
 
 @Injectable()
-export class UsersRepository {
+export class UsersRepository implements IUsersRepository {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
@@ -130,7 +131,10 @@ export class UsersRepository {
     }
   }
 
-  async updatePassword(userId: ObjectId, hashedPassword: string) {
+  async updatePassword(
+    userId: ObjectId,
+    hashedPassword: string,
+  ): Promise<boolean> {
     try {
       const res = await this.userModel.updateOne(
         { _id: userId },
